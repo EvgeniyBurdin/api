@@ -9,7 +9,7 @@
 from pydantic import BaseModel, Extra
 
 
-class BaseApi(BaseModel):
+class Base(BaseModel):
     """ Базовый класс данных
     """
     class Config:
