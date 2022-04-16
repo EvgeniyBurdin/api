@@ -13,17 +13,22 @@ ID_FIELD_NAME = "id"
 class SimpleStorage(AbstractStorage):
 
     def __init__(self) -> None:
+
         self.db: Dict[str, List[Dict[str, Any]]] = {}
 
-    def try_get_table_data(self, table_name: str) -> List[Dict[str, Any]]:
+    async def create(
+        self, table_name: str, row: Dict[str, Any]
+    ) -> Dict[str, Any]:
 
-        result = self.db.get(table_name)
+        if ID_FIELD_NAME not in row:
+            row[ID_FIELD_NAME] = uuid4()
 
-        if result is None:
-            message = f"Table '{table_name}' does not exist"
-            raise StorageTableDoesNotExistError(message)
+        if table_name not in self.db:
+            self.db[table_name] = []
 
-        return result
+        self.db[table_name].append(row)
+
+        return row
 
     async def read(
         self, table_name: str, ids: Union[None, list] = None
@@ -36,15 +41,12 @@ class SimpleStorage(AbstractStorage):
 
         return [row for row in table_data if row[ID_FIELD_NAME] in ids]
 
-    async def create(
-        self, table_name: str, row: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def try_get_table_data(self, table_name: str) -> List[Dict[str, Any]]:
 
-        row[ID_FIELD_NAME] = uuid4()
+        result = self.db.get(table_name)
 
-        if table_name not in self.db:
-            self.db[table_name] = []
+        if result is None:
+            message = f"Table '{table_name}' does not exist"
+            raise StorageTableDoesNotExistError(message)
 
-        self.db[table_name].append(row)
-
-        return row
+        return result
