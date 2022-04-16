@@ -13,9 +13,7 @@ class SimpleStorage(AbstractStorage):
 
     def __init__(self) -> None:
 
-        self.db: Dict[str, List[Dict[str, Any]]] = {
-            "articles": [],
-        }
+        self.db: Dict[str, List[Dict[str, Any]]] = {}
 
     async def create(
         self, table_name: str, row: Dict[str, Any]
@@ -23,6 +21,9 @@ class SimpleStorage(AbstractStorage):
 
         if ID_FIELD_NAME not in row:
             row[ID_FIELD_NAME] = uuid4()
+
+        if table_name not in self.db:
+            self.db[table_name] = []
 
         self.db[table_name].append(row)
 
