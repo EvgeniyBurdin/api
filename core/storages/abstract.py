@@ -14,6 +14,6 @@ class AbstractStorage(ABC):
 
     @abstractmethod
     async def read(
-        self, table_name: str, ids: Optional[list] = None
+        self, table_name: str, filters: Optional[Dict[str, list]] = None
     ) -> List[Dict[str, Any]]:
         pass
