@@ -2,6 +2,7 @@
 """
 import datetime
 from typing import List
+
 from valdec.decorators import async_validate as validate
 
 from .data_classes.params import ArticleCreatedDatePP, CreateArticleDCRB
@@ -30,6 +31,6 @@ async def read_article(
     """ Создает в хранилище новую запись о статье.
         Возвращает созданную запись.
     """
-    return await storage.read(
-        table_name="articles", filters={"created": [created]}
-    )
+    filters = {"created": [created]}
+
+    return await storage.read(table_name="articles", filters=filters)
