@@ -1,7 +1,7 @@
 """ Модуль для обработчиков CRUD.
 """
 import datetime
-from typing import List
+from typing import List, Optional
 
 from valdec.decorators import async_validate as validate
 
@@ -25,12 +25,11 @@ async def create_article(
 
 @only_validate("return")
 @validate("created")
-async def read_article(
-    created: ArticleCreatedDatePP, storage: Storage
+async def read_articles(
+    storage: Storage, created: Optional[ArticleCreatedDatePP] = None
 ) -> List[ArticleDC]:
-    """ Создает в хранилище новую запись о статье.
-        Возвращает созданную запись.
+    """ Читает из хранилища статьи и возвращает их.
     """
-    filters = {"created": [created]}
+    filters = None if created is None else {"created": [created]}
 
     return await storage.read(table_name="articles", filters=filters)
