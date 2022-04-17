@@ -49,7 +49,7 @@ class SimpleStorage(AbstractStorage):
 
         for row in table_data:
             for name, value in filters.items():
-                if name not in row or value != row[name]:
+                if name not in row or row[name] not in value:
                     break
             else:
                 result.append(row)

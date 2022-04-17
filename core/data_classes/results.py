@@ -8,7 +8,7 @@ from pydantic import Field, StrictStr
 from .base import BaseDC
 
 
-class ArticleResultsDC(BaseDC):
+class ArticleDC(BaseDC):
     """ Данные о статье.
     """
     id: uuid.UUID = Field(description="Идентификатор")
