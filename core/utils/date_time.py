@@ -36,9 +36,9 @@ def convert_timezone(dt: datetime, target_tz: str = "+00:00") -> datetime:
     if dt.utcoffset() is None:
         dt = dt.replace(tzinfo=timezone.utc)
 
-    t_zone = timezone(tzstr_to_timedelta(target_tz))
+    time_zone = timezone(tzstr_to_timedelta(target_tz))
 
-    return dt.astimezone(t_zone)
+    return dt.astimezone(time_zone)
 
 
 def datetime_to_str(

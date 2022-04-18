@@ -37,8 +37,8 @@ def test_tzstr_to_timedelta_wrong_hours_minutes():
     assert "60" in str(error)
 
     with pytest.raises(DateTimeUtilsError) as error:
-        tzstr_to_timedelta("00:-60")
-    assert "-60" in str(error)
+        tzstr_to_timedelta("00:-01")
+    assert "-01" in str(error)
 
 
 # Исходный dt без указания таймзоны
