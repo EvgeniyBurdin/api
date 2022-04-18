@@ -7,12 +7,12 @@ from pydantic import Field, StrictStr
 from .base import BaseDCRB, BasePP
 
 
-class CreateArticleDCRB(BaseDCRB):
+class NewArticleDCRB(BaseDCRB):
     """ Данные для создания новой статьи.
     """
     header: StrictStr = Field(description="Заголовок")
     content: StrictStr = Field(description="Содержание")
 
 
-class ArticleCreatedDatePP(datetime.date, BasePP):
+class ArticleCreatedPP(datetime.date, BasePP):
     """ Дата создания статьи."""

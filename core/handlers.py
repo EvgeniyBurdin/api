@@ -1,11 +1,11 @@
 """ Модуль для обработчиков CRUD.
 """
-import datetime
+from datetime import datetime, timezone
 from typing import List
 
 from valdec.decorators import async_validate as validate
 
-from .data_classes.params import ArticleCreatedDatePP, CreateArticleDCRB
+from .data_classes.params import ArticleCreatedPP, NewArticleDCRB
 from .data_classes.results import ArticleDC
 from .decorators import only_validate
 from .storages import Storage
@@ -13,20 +13,20 @@ from .storages import Storage
 
 @only_validate("body", "return")
 async def create_article(
-    body: CreateArticleDCRB, storage: Storage
+    new_article_dcrb: NewArticleDCRB, storage: Storage
 ) -> ArticleDC:
     """ Создает в хранилище новую запись о статье.
         Возвращает созданную запись.
     """
-    body["created"] = datetime.date.today()
+    new_article_dcrb["created"] = datetime.now(tz=timezone.utc).date()
 
-    return await storage.create(table_name="articles", row=body)
+    return await storage.create(table_name="articles", row=new_article_dcrb)
 
 
 @only_validate("return")
 @validate("created")
 async def read_articles(
-    storage: Storage, created: ArticleCreatedDatePP
+    storage: Storage, created: ArticleCreatedPP
 ) -> List[ArticleDC]:
     """ Читает из хранилища статьи и возвращает их.
     """
