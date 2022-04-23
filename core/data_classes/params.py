@@ -1,10 +1,8 @@
 """ Модуль для классов данных на параметров (аргументов).
 """
-import datetime
-
 from pydantic import Field, StrictStr
 
-from .base import BaseDCRB, BasePP
+from .base import BaseDCRB, BaseDCUQ
 
 
 class NewArticleDCRB(BaseDCRB):
@@ -14,5 +12,9 @@ class NewArticleDCRB(BaseDCRB):
     content: StrictStr = Field(description="Содержание")
 
 
-class ArticleCreatedPP(datetime.date, BasePP):
-    """ Дата создания статьи."""
+class ReadArticlesDCUQ(BaseDCUQ):
+    """ Данные для чтения статей.
+    """
+    header_prefix: StrictStr = Field(
+        description="Прификс заголовка для фильтрации статей"
+    )
