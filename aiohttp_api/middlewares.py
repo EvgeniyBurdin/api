@@ -1,4 +1,5 @@
 from copy import copy
+from dataclasses import asdict, dataclass
 from typing import Any, Callable, List, Optional, Tuple
 
 from aiohttp import web
@@ -17,6 +18,13 @@ class InvalidHandlerArgument(MiddlewaresError):
 
 class InputDataValidationError(MiddlewaresError):
     pass
+
+
+@dataclass
+class InputData:
+    request_body: Any = None
+    url_query: Optional[dict] = None
+    math_info: Optional[dict] = None
 
 
 class KwargsHandler:
@@ -158,22 +166,17 @@ class KwargsHandler:
 
         return response_body, status
 
-    async def get_json_dumps(self, response_body: Any) -> str:
-        """ Возвращает json-строку с дампом response_body.
-        """
-        return json_dumps(response_body)
-
     async def get_response_text_and_status(
         self, response_body: Any, status: int
     ) -> Tuple[str, int]:
         """ Возвращает json-строку для ответа и код статуса ответа.
         """
         try:
-            text = await self.get_json_dumps(response_body)
+            text = json_dumps(response_body)
 
         except Exception as error:
             error_body = self.get_error_body(error)
-            text = await self.get_json_dumps(error_body)
+            text = json_dumps(error_body)
             status = 500
 
         return text, status
@@ -187,11 +190,11 @@ class KwargsHandler:
         """
         request_body = {}
 
-        mp = await request.multipart()
+        multipart_reader = await request.multipart()
 
         while True:
 
-            part = await mp.next()
+            part = await multipart_reader.next()
             if part is None:
                 break
 
@@ -209,20 +212,27 @@ class KwargsHandler:
 
         return request_body
 
-    async def get_request_body(
+    async def extract_request_body(
         self, request: web.Request, handler: Callable
     ) -> Any:
         """ Вытаскивает из запроса json или multipart, декодирует его в объект
             python, и возвращает его.
         """
-        request_body = {}
-
         if handler in self.multipart_api_handlers:
             request_body = await self.read_multipart_request_body(request)
         elif request.body_exists:
             request_body = await request.json()
 
         return request_body
+
+    async def extract_input_data(self, request, handler) -> InputData:
+        """ Извлекает из запроса все входящие данные и возвращает их.
+        """
+        request_body = await self.extract_request_body(request, handler)
+        url_query = request.query
+        match_info = request.match_info.get_info()
+
+        return InputData(request_body, url_query, match_info)
 
     @web.middleware
     async def middleware(
@@ -233,19 +243,18 @@ class KwargsHandler:
         if not self.is_json_api_handler(handler):
             return await handler(request)
 
-        request_body = None
-
         try:
-            request_body = await self.get_request_body(request, handler)
+            input_data = await self.extract_input_data(request, handler)
 
         except Exception as error:
             response_body = self.get_error_body(error)
             status = 400
+            input_data = InputData()
 
         else:
             # Запуск обработчика
             response_body, status = await self.get_response_body_and_status(
-                request, handler, request_body
+                request, handler, input_data
             )
 
         finally:
@@ -258,7 +267,7 @@ class KwargsHandler:
                 message = f"API: handler={handler.__name__}, "
                 message += f"url={request.rel_url}, "
                 message += f"error={text}, status={status}, "
-                message += f"request_body={request_body}"
+                message += f"input_data={asdict(input_data)}"
 
         return web.Response(
             text=text, status=status, content_type="application/json",
