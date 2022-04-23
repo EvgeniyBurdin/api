@@ -1,11 +1,12 @@
 from copy import copy
-from dataclasses import asdict, dataclass
+from dataclasses import asdict
 from typing import Any, Callable, List, Optional, Tuple
 
 from aiohttp import web
 from valdec.errors import ValidationArgumentsError
 
 from .args_manager import ArgumentsManager, RawDataForArgument, json_dumps
+from .query import InputData, extract_input_data
 
 
 class MiddlewaresError(Exception):
@@ -18,13 +19,6 @@ class InvalidHandlerArgument(MiddlewaresError):
 
 class InputDataValidationError(MiddlewaresError):
     pass
-
-
-@dataclass
-class InputData:
-    request_body: Any = None
-    url_query: Optional[dict] = None
-    math_info: Optional[dict] = None
 
 
 class KwargsHandler:
@@ -50,8 +44,6 @@ class KwargsHandler:
         arguments_manager: ArgumentsManager,
         json_api_routes: List[web.RouteDef],
         multipart_api_routes: Optional[List[web.RouteDef]] = None,
-        file_name_key_name: str = "file_name",
-        file_data_key_name: str = "file_data",
     ) -> None:
 
         self.arguments_manager = arguments_manager
@@ -66,9 +58,6 @@ class KwargsHandler:
             route.handler for route in multipart_api_routes
         ])
 
-        self.file_name_key_name = file_name_key_name
-        self.file_data_key_name = file_data_key_name
-
     def build_error_message_for_invalid_handler_argument(
         self, handler: Callable, arg_name: str, annotation: Any
     ) -> str:
@@ -81,7 +70,7 @@ class KwargsHandler:
         return message
 
     def make_handler_kwargs(
-        self, request: web.Request, handler: Callable, request_body: Any
+        self, request: web.Request, handler: Callable, input_data: InputData
     ) -> dict:
         """ Собирает и возвращает kwargs для последующего его использования
             при вызове обработчика.
@@ -133,17 +122,17 @@ class KwargsHandler:
         return handler in self.json_api_handlers
 
     async def run_handler(
-        self, request: web.Request, handler: Callable, request_body: Any
+        self, request: web.Request, handler: Callable, input_data: InputData
     ) -> Any:
         """ Запуск реального обработчика.
             Возвращает результат его работы.
         """
-        kwargs = self.make_handler_kwargs(request, handler, request_body)
+        kwargs = self.make_handler_kwargs(request, handler, input_data)
 
         return await handler(**kwargs)
 
     async def get_response_body_and_status(
-        self, request: web.Request, handler: Callable, request_body: Any
+        self, request: web.Request, handler: Callable, input_data: InputData
     ) -> Tuple[Any, int]:
         """ Вызывает метод запуска обработчика и обрабатывает возможные
             ошибки.
@@ -151,13 +140,13 @@ class KwargsHandler:
         """
         try:
             response_body = await self.run_handler(
-                request, handler, request_body
+                request, handler, input_data
             )
             status = 200
 
         except ValidationArgumentsError as error:
-            _error = InputDataValidationError(str(error))
-            response_body = self.get_error_body(_error)
+            input_validation_error = InputDataValidationError(str(error))
+            response_body = self.get_error_body(input_validation_error)
             status = 400
 
         except Exception as error:
@@ -181,59 +170,6 @@ class KwargsHandler:
 
         return text, status
 
-    async def read_multipart_request_body(self, request: web.Request) -> dict:
-        """ Читает данные из multipart.
-
-            Внимание!
-            Части могут быть только с content_type="application/json" или
-            content_type="application/octet-stream".
-        """
-        request_body = {}
-
-        multipart_reader = await request.multipart()
-
-        while True:
-
-            part = await multipart_reader.next()
-            if part is None:
-                break
-
-            if part.filename is None:
-                # Получили content_type="application/json"
-                data = await part.json()
-                request_body[part.name] = data
-            else:
-                # Получили content_type="application/octet-stream"
-                data = await part.read(decode=False)
-                request_body[part.name] = {
-                    self.file_name_key_name: part.filename,
-                    self.file_data_key_name: data,
-                }
-
-        return request_body
-
-    async def extract_request_body(
-        self, request: web.Request, handler: Callable
-    ) -> Any:
-        """ Вытаскивает из запроса json или multipart, декодирует его в объект
-            python, и возвращает его.
-        """
-        if handler in self.multipart_api_handlers:
-            request_body = await self.read_multipart_request_body(request)
-        elif request.body_exists:
-            request_body = await request.json()
-
-        return request_body
-
-    async def extract_input_data(self, request, handler) -> InputData:
-        """ Извлекает из запроса все входящие данные и возвращает их.
-        """
-        request_body = await self.extract_request_body(request, handler)
-        url_query = request.query
-        match_info = request.match_info.get_info()
-
-        return InputData(request_body, url_query, match_info)
-
     @web.middleware
     async def middleware(
         self, request: web.Request, handler: Callable
@@ -243,8 +179,10 @@ class KwargsHandler:
         if not self.is_json_api_handler(handler):
             return await handler(request)
 
+        is_multiparts = handler in self.multipart_api_handlers
+
         try:
-            input_data = await self.extract_input_data(request, handler)
+            input_data = await extract_input_data(request, is_multiparts)
 
         except Exception as error:
             response_body = self.get_error_body(error)
