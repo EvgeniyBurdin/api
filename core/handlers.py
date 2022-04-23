@@ -3,15 +3,13 @@
 from datetime import datetime, timezone
 from typing import List
 
-from valdec.decorators import async_validate as validate
-
 from .data_classes.params import ArticleCreatedPP, NewArticleDCRB
 from .data_classes.results import ArticleDC
-from .decorators import only_validate
+from .decorators import validate, validate_raw
 from .storages import Storage
 
 
-@only_validate("body", "return")
+@validate_raw("body", "return")
 async def create_article(
     new_article_dcrb: NewArticleDCRB, storage: Storage
 ) -> ArticleDC:
@@ -23,7 +21,7 @@ async def create_article(
     return await storage.create(table_name="articles", row=new_article_dcrb)
 
 
-@only_validate("return")
+@validate_raw("return")
 @validate("created")
 async def read_articles(
     storage: Storage, created: ArticleCreatedPP

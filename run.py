@@ -20,10 +20,10 @@ asyncio.run(create_article(
     storage=storage,
 ))
 
-storage.db["articles"][0]["created"] = datetime.date(2022, 4, 16)
+storage.db["articles"][0]["created"] = datetime.date(2022, 4, 22)
 
 articles = asyncio.run(read_articles(
-    created="2022-04-18",
+    created="2022-04-23",
     storage=storage,
 ))
 
