@@ -11,14 +11,14 @@ from .storages import Storage
 
 @validate_raw("body", "return")
 async def create_article(
-    new_article_dcrb: NewArticleDCRB, storage: Storage
+    new_article: NewArticleDCRB, storage: Storage
 ) -> ArticleDC:
     """ Создает в хранилище новую запись о статье.
         Возвращает созданную запись.
     """
-    new_article_dcrb["created"] = datetime.now(tz=timezone.utc).date()
+    new_article["created"] = datetime.now(tz=timezone.utc).date()
 
-    return await storage.create(table_name="articles", row=new_article_dcrb)
+    return await storage.create(table_name="articles", row=new_article)
 
 
 @validate_raw("return")

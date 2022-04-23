@@ -14,6 +14,6 @@ class ArticleDC(BaseDC):
     """ Данные о статье.
     """
     id: uuid.UUID = Field(description="Идентификатор")
-    created: datetime.date = Field(description="Дата создания (UTC0)")
+    created: datetime.date = Field(description="Дата создания")
     header: StrictStr = Field(description="Заголовок")
     content: StrictStr = Field(description="Содержание")

@@ -8,15 +8,15 @@ storage = Storage()
 
 
 asyncio.run(create_article(
-    new_article_dcrb={"header": "Header_1", "content": "Content_1"},
+    new_article={"header": "Header_1", "content": "Content_1"},
     storage=storage,
 ))
 asyncio.run(create_article(
-    new_article_dcrb={"header": "Header_2", "content": "Content_2"},
+    new_article={"header": "Header_2", "content": "Content_2"},
     storage=storage,
 ))
 asyncio.run(create_article(
-    new_article_dcrb={"header": "Header_3", "content": "Content_3"},
+    new_article={"header": "Header_3", "content": "Content_3"},
     storage=storage,
 ))
 
