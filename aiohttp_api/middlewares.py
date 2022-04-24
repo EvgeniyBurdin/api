@@ -5,10 +5,10 @@ from dataclasses import asdict
 from typing import Any, Callable, List, Optional, Tuple
 
 from aiohttp import web
-from utils.json import json_dumps
 from valdec.errors import ValidationArgumentsError
 
 from .args_manager import ArgumentsManager, RawDataForArgument
+from .json_utils import json_dumps
 from .query import InputData, extract_input_data
 
 

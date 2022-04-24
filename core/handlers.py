@@ -3,8 +3,7 @@
 import datetime
 from typing import List
 
-from storages import Storage
-
+from .storages import Storage
 from .data_classes.params import NewArticleDC, ReadArticlesDCA
 from .data_classes.results import ArticleDC
 from .decorators import validate, validate_raw

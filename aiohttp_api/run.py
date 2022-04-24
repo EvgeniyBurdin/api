@@ -2,7 +2,7 @@
 """
 from aiohttp import web
 from core.data_classes.base import BaseDCA
-from storages import Storage
+from core.storages import Storage
 
 from aiohttp_api.app import get_app
 from aiohttp_api.settings import APP_PORT
