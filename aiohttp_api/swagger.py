@@ -44,7 +44,7 @@ def add_swagger_to_app(
     # Удалим ключ, который aiohttp_swagger3 "не хочет" принимать
     # (схему для сваггера мы уже сделали, и он уже и не нужен)
     for route in routes:
-        route.kwargs.pop("swagger_parameters", None)
+        route.kwargs.pop("swagger_path_parameters", None)
 
     # (это "странность" библиотеки aiohttp_swagger3, скорее всего они применили
     # такой подход для реализации возможности валидации запросов в доке)

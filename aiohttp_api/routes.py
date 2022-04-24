@@ -15,7 +15,7 @@ json_api_routes = [
     web.get(
         ROOT_URL+"/read_articles/{created}", read_articles,
         name="read_articles", allow_head=False,
-        swagger_parameters={
+        swagger_path_parameters={
             "created": {
                 "description": "Дата создания", "example": "2022-04-26",
             }
