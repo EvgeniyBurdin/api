@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from typing import List, Optional, Tuple, Type
 
 from aiohttp import web
-from core.data_classes.base import BaseMultipartDC
+from core.data_classes.base import BaseMultipartDC, BaseDCA
 from pydantic import create_model
 from pydantic.main import BaseModel
 from pydantic.schema import schema
@@ -96,8 +96,8 @@ def make_multipart_request_body(input_annotation) -> dict:
     return {"content": {"multipart/form-data": {"schema": s}}}
 
 
-def make_parameters_in_path(route: web.RouteDef):
-    """ Создает описание для параметров в пути к методу.
+def make_parameters_in_path(route: web.RouteDef) -> List[dict]:
+    """ Создает описание для параметров в пути к методу и возвращает его.
     """
     result = []
 
@@ -118,11 +118,11 @@ def make_parameters_in_path(route: web.RouteDef):
             "name": param_name,
             "in": "path",
             "required": True,
-            "schema": {
-                "type": props["type"],
-                "format": props["format"]
-            }
+            "schema": {"type": props["type"]}
         }
+        format_ = props.get("format")
+        if format_ is not None:
+            parameter["schema"]["format"] = format_
 
         # При создании роута можно дополнительно указать любые свойства для
         # параметра. Так как из аннотации к аргументу нам не доступны
@@ -137,7 +137,7 @@ def make_parameters_in_path(route: web.RouteDef):
     return result
 
 
-def get_tags(route: web.RouteDef, default: List[str]):
+def get_tags(route: web.RouteDef, default: List[str]) -> List[str]:
     """ Извлекает из роута тэги для метода и возвращает их.
     """
     # При создании роута можно дополнительно указать тэги для метода.
@@ -146,6 +146,39 @@ def get_tags(route: web.RouteDef, default: List[str]):
         return route.kwargs["swagger_handler_tags"]
     else:
         return default
+
+
+def make_parameters_in_query(route: web.RouteDef) -> List[dict]:
+    """ Создает описание для параметров запроса в пути к методу и
+        возвращает его.
+    """
+    result = []
+
+    for ann in route.handler.__annotations__.values():
+        if isinstance(ann, type) and issubclass(ann, BaseDCA):
+            schema = ann.schema()
+            required = schema.get("required", [])
+            # Извлечем из схемы класса свойства для его полей
+            for name, props in schema["properties"].items():
+                # Созданим описание для параметра
+                parameter = {
+                    "name": name,
+                    "in": "query",
+                    "required": name in required,
+                    "schema": {"type": props["type"]}
+                }
+
+                description_ = props.get("description")
+                if description_ is not None:
+                    parameter["description"] = description_
+
+                format_ = props.get("format")
+                if format_ is not None:
+                    parameter["schema"]["format"] = format_
+
+                result.append(parameter)
+
+    return result
 
 
 def swagger_preparation(
@@ -274,8 +307,10 @@ def swagger_preparation(
                 }
 
         parameters_in_path = make_parameters_in_path(route)
-        if parameters_in_path:
-            docstring["parameters"] = parameters_in_path
+        parameters_in_query = make_parameters_in_query(route)
+
+        if parameters_in_path or parameters_in_query:
+            docstring["parameters"] = parameters_in_path + parameters_in_query
 
         handler.__doc__ = json.dumps(docstring)
 
