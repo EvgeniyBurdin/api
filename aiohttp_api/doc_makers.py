@@ -1,6 +1,7 @@
 """Функции для создания документации."""
 
 import json
+import re
 from dataclasses import dataclass
 from typing import List, Optional, Tuple, Type
 
@@ -116,28 +117,46 @@ def make_multipart_request_body(input_annotation) -> dict:
     return {"content": {"multipart/form-data": {"schema": s}}}
 
 
+def get_parameters_in_path(route: web.RouteDef):
+
+    result = []
+
+    params = re.findall(r"{(.*?)}", route.path)
+    for param in params:
+        annotation = route.handler.__annotations__.get(param)
+        schema_class = create_schema_class(None, "Param", param, annotation)
+        props = schema_class.schema()["properties"][param]
+        definition = {
+            "name": param,
+            "in": "path",
+            "required": True,
+            "schema": {
+                "type": props["type"],
+                "format": props["format"]
+            }
+        }
+        result.append(definition)
+    return result
+
+
 def swagger_preparation(
     routes: List[web.RouteDef],
-    arg_name: str,
-    request_wrap: Optional[ServerWrap] = None,
-    response_wrap: Optional[ServerWrap] = None,
+    request_body_arg_name: str,
     error_class: Optional[Type[BaseModel]] = None,
     error_descriptions: Tuple[ServerError] = (
         ServerError("400", "Неправильный, некорректный запрос"),
         ServerError("401", "Ошибка авторизации"),
-        ServerError("403", "Доступ запрещен"),
         ServerError("500", "Внутренняя ошибка сервера")
     )
 ) -> dict:
     """ Подготовка документации для использования библиотекой aiohttp_swagger.
 
-        :handlers: Список обработчиков апи-методов.
-        :arg_name: Имя аргумента у апи-метода по аннотации которого будет
-                   формироваться документация для входящих данных запроса.
-        :request_wrap:  Описание класса для обертки входящих данных сервера.
-        :response_wrap: Описание класса для обертки исходящих данных сервера.
-        :error_class:   Класс для ответа с ошибкой.
-        :error_descriptions: Описания ошибок
+        :handlers:              Список обработчиков апи-методов.
+        :request_body_arg_name: Имя аргумента у апи-метода по аннотации
+                                которого будет формироваться документация для
+                                входящих данных запроса.
+        :error_class:           Класс для ответа с ошибкой.
+        :error_descriptions:    Описания ошибок
 
         1. Изменяет у каждого обработчика docstring (вставляет в docstring
         схему для аргумента с именем arg_name и для результата).
@@ -146,17 +165,10 @@ def swagger_preparation(
         в приложении, классов данных.
 
         Возвращает словарь result_definitions.
-
-        (словарь result_definitions затем передается в вызове
-        aiohttp_swagger.setup_swagger(..., definitions=result_definitions, ...)
-        при старте приложения)
     """
     result_definitions = {}
 
-    server_classes = [
-        wrap.wrap_class for wrap in (request_wrap, response_wrap)
-        if wrap is not None
-    ]
+    server_classes = []
     if error_class is not None:
         server_classes.append(error_class)
 
@@ -170,7 +182,7 @@ def swagger_preparation(
 
         handler = route.handler
 
-        input_annotation = handler.__annotations__.get(arg_name)
+        input_annotation = handler.__annotations__.get(request_body_arg_name)
         output_annotation = handler.__annotations__["return"]
 
         schema_classes = tuple()
@@ -180,14 +192,14 @@ def swagger_preparation(
         if input_annotation is not None:
             request_root_name = "request"
             Request = create_schema_class(
-                request_wrap, "Request", request_root_name, input_annotation
+                None, "Request", request_root_name, input_annotation
             )
             schema_classes += (Request, )
 
         output_annotation = handler.__annotations__["return"]
         response_root_name = "response"
         Response = create_schema_class(
-            response_wrap, "Response", response_root_name, output_annotation
+            None, "Response", response_root_name, output_annotation
         )
         schema_classes += (Response, )
 
@@ -200,15 +212,10 @@ def swagger_preparation(
         request_schema = {}
         if Request is not None:
             request_schema = definitions["Request"]
-            if request_wrap is None:
-                request_schema = request_schema[
-                    "properties"
-                ][request_root_name]
+            request_schema = request_schema["properties"][request_root_name]
 
         r200_schema = definitions["Response"]
-
-        if response_wrap is None:
-            r200_schema = r200_schema["properties"][response_root_name]
+        r200_schema = r200_schema["properties"][response_root_name]
 
         handler_docstring = parse_handler_docstring(handler.__doc__)
 
@@ -243,14 +250,6 @@ def swagger_preparation(
                     input_annotation
                 )
 
-        if request_wrap is not None and request_schema:
-            docstring["parameters"] = [{
-                "in": "body",
-                "name": arg_name,
-                "required": True,
-                "schema": request_schema["properties"][request_wrap.root_name]
-            }]
-
         if error_class is not None:
             for error in error_descriptions:
                 docstring["responses"][error.code] = {
@@ -264,6 +263,10 @@ def swagger_preparation(
                         }
                     }
                 }
+
+        parameters_in_path = get_parameters_in_path(route)
+        if parameters_in_path:
+            docstring["parameters"] = parameters_in_path
 
         handler.__doc__ = json.dumps(docstring)
 

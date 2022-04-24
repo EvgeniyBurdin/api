@@ -18,11 +18,7 @@ def add_swagger_to_app(
         routes=routes,
         # Имя аргумента в обработчиках по аннотации к которому будет
         # создаваться документация для входящих данных
-        arg_name=REQUEST_BODY_ARG_NAME,
-        # Классы оболочек запроса к серверу и его ответа
-        # request_wrap=ServerWrap(ServerRequest, "params"),
-        # response_wrap=ServerWrap(ServerResponse, "result"),
-        # Покажем и ошибки
+        request_body_arg_name=REQUEST_BODY_ARG_NAME,
         error_class=ErrorResultDC
     )
 
