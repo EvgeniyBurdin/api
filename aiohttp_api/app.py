@@ -5,6 +5,7 @@ from aiohttp import web
 from .args_manager import ArgumentsManager
 from .middlewares import KwargsHandler
 from .routes import json_api_routes  # , routes
+from .settings import REQUEST_BODY_ARG_NAME
 
 
 def get_app(storage, url_query_data_class) -> web.Application:
@@ -23,7 +24,7 @@ def get_app(storage, url_query_data_class) -> web.Application:
 
     # Регистрация имени аргумента обработчика JSON API, в который будут
     # передаваться данные полученные из json-тела запроса
-    arguments_manager.reg_request_body("body")
+    arguments_manager.reg_request_body(REQUEST_BODY_ARG_NAME)
 
     # Создадим и подключим мидлевару для JSON API методов
     kwargs_handler = KwargsHandler(
