@@ -22,7 +22,6 @@ class HandlerDoc:
     """
     title: str
     content: str
-    tags: List[str]
 
 
 @dataclass
@@ -44,24 +43,6 @@ class ServerError:
     description: str
 
 
-def extract_tags(strings: List[str]) -> List[str]:
-
-    pos = None
-    for i, string in enumerate(strings):
-        if string.startswith(TAGS_DOCSTRING_MARKER):
-            pos = i
-
-    result = ["Общие"]
-    if pos is not None:
-        str_tags = strings.pop(pos)
-        str_tags = str_tags.replace(TAGS_DOCSTRING_MARKER, "")
-        str_tags = str_tags.strip()
-        tags = str_tags.split(",")
-        result = [tag.strip() for tag in tags if tag]
-
-    return result
-
-
 def parse_handler_docstring(docstring: str) -> HandlerDoc:
     """ Парсит докстринг обработчика и возращает разделы документации.
 
@@ -73,14 +54,12 @@ def parse_handler_docstring(docstring: str) -> HandlerDoc:
     strings = docstring.split("\n")
     strings = [s.strip() for s in strings if s]
 
-    tags = extract_tags(strings)
-
     title = content = strings[0]
 
     if len(strings) > 1:
         content = "\n".join(strings[1:]).strip()
 
-    return HandlerDoc(title=title, content=content, tags=tags)
+    return HandlerDoc(title=title, content=content)
 
 
 def create_schema_class(
@@ -156,6 +135,14 @@ def make_parameters_in_path(route: web.RouteDef):
         result.append(parameter)
 
     return result
+
+
+def get_tags(route: web.RouteDef, default):
+
+    if "swagger_handler_tags" in route.kwargs:
+        return route.kwargs["swagger_handler_tags"]
+    else:
+        return default
 
 
 def swagger_preparation(
@@ -240,7 +227,7 @@ def swagger_preparation(
 
         docstring = {
             "summary": handler_docstring.title,
-            "tags": handler_docstring.tags,
+            "tags": get_tags(route, ["Общие"]),
             "description": handler_docstring.content,
             "responses": {
                 "200": {

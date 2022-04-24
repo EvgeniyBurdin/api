@@ -41,10 +41,11 @@ def add_swagger_to_app(
         swagger.spec["security"] = [{"basicAuth": []}]
     swagger._app[_SWAGGER_SPECIFICATION] = swagger.spec
 
-    # Удалим ключ, который aiohttp_swagger3 "не хочет" принимать
-    # (схему для сваггера мы уже сделали, и он уже и не нужен)
+    # Удалим ключи, который aiohttp_swagger3 "не хочет" принимать
+    # (схему для сваггера мы уже сделали, и они уже и не нужны)
     for route in routes:
         route.kwargs.pop("swagger_path_parameters", None)
+        route.kwargs.pop("swagger_handler_tags", None)
 
     # (это "странность" библиотеки aiohttp_swagger3, скорее всего они применили
     # такой подход для реализации возможности валидации запросов в доке)

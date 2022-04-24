@@ -10,7 +10,7 @@ json_api_routes = [
 
     web.post(
         ROOT_URL+"/create_article", create_article,
-        name="create_article"
+        name="create_article", swagger_handler_tags=["Статьи"],
     ),
     web.get(
         ROOT_URL+"/read_articles/{created}", read_articles,
@@ -19,7 +19,8 @@ json_api_routes = [
             "created": {
                 "description": "Дата создания", "example": "2022-04-26",
             }
-        }
+        },
+        swagger_handler_tags=["Статьи"],
     ),
 ]
 
