@@ -1,5 +1,7 @@
 """ Модуль для классов данных на параметров (аргументов).
 """
+from typing import Optional
+
 from pydantic import Field, StrictStr
 
 from .base import BaseDC, BaseDCA
@@ -15,6 +17,6 @@ class NewArticleDC(BaseDC):
 class ReadArticlesDCA(BaseDCA):
     """ Данные для чтения статей.
     """
-    header_prefix: StrictStr = Field(
+    header_prefix: Optional[StrictStr] = Field(
         description="Прификс заголовка для фильтрации статей"
     )

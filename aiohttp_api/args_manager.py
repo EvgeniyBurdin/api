@@ -13,6 +13,7 @@ class RawDataForArgument:
 
     request: web.Request
     input_data: InputData
+    arg_name: Any = None
 
 
 class ArgumentsManager:
@@ -24,7 +25,11 @@ class ArgumentsManager:
 
     def __init__(self, request_class: Type, query_class: Type) -> None:
 
+        # Класс для идентификации аргумента для экземпляра web.Request
         self.request_class = request_class
+
+        # Класс для идентификации аргумента для экземпляра класса_данных
+        # с данными запроса из урла
         self.query_class = query_class
 
         self.getters: Dict[str, Callable] = {}
@@ -36,20 +41,21 @@ class ArgumentsManager:
         if annotation is self.request_class:
             return raw_data.request
 
-        if annotation is self.query_class:
+        if issubclass(annotation, self.query_class):
             return raw_data.input_data.url_query
 
         if arg_name in raw_data.input_data.url_parts:
             return raw_data.input_data.url_parts[arg_name]
 
         getter = self.getters[arg_name]
+        raw_data.arg_name = arg_name
 
         return getter(raw_data)
 
     # Тело json запроса ------------------------------------------------------
 
     def reg_request_body(self, arg_name) -> None:
-        """ Регистрация имени аргумента для тела запроса.
+        """ Регистрация имени аргумента для json-тела запроса.
         """
         self.getters[arg_name] = self.get_request_body
 

@@ -8,9 +8,11 @@ from aiohttp.web import Request
 
 @dataclass
 class InputData:
-    request_body: Any
-    url_parts: dict
-    url_query: dict
+    """ Класс данных, которые могут быть переданы в запросе.
+    """
+    request_body: Any  # json-тело запроса
+    url_parts: dict    # данные в частях урла
+    url_query: dict    # данные из запроса в урле (в конце, через знак вопроса)
 
 
 async def extract_multipart_request_body(request: Request) -> dict:
@@ -68,4 +70,6 @@ async def extract_input_data(
     url_parts = dict(request.match_info)
     url_query = dict(request.query)
 
-    return InputData(request_body, url_parts, url_query)
+    return InputData(
+        request_body=request_body, url_parts=url_parts, url_query=url_query
+    )

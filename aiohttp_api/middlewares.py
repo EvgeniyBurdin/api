@@ -5,9 +5,10 @@ from dataclasses import asdict
 from typing import Any, Callable, List, Optional, Tuple
 
 from aiohttp import web
+from utils.json import json_dumps
 from valdec.errors import ValidationArgumentsError
 
-from .args_manager import ArgumentsManager, RawDataForArgument, json_dumps
+from .args_manager import ArgumentsManager, RawDataForArgument
 from .query import InputData, extract_input_data
 
 
@@ -84,15 +85,15 @@ class KwargsHandler:
         annotations = copy(handler.__annotations__)
         annotations.pop("return", None)
 
-        raw_data = RawDataForArgument(request, input_data)
+        raw_data = RawDataForArgument(request=request, input_data=input_data)
 
         for arg_name, annotation in annotations.items():
-
             try:
                 kwargs[arg_name] = self.arguments_manager.make_arg_value(
-                    raw_data, arg_name, annotation
+                    raw_data=raw_data,
+                    arg_name=arg_name,
+                    annotation=annotation,
                 )
-
             except KeyError:
                 msg = self.build_error_message_for_invalid_handler_argument(
                     handler, arg_name, annotation
