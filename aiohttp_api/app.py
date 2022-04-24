@@ -4,7 +4,7 @@ from aiohttp import web
 
 from .args_manager import ArgumentsManager
 from .middlewares import KwargsHandler
-from .routes import json_api_routes
+from .routes import json_api_routes  # , routes
 
 
 def get_app(storage, url_query_data_class) -> web.Application:
@@ -31,5 +31,11 @@ def get_app(storage, url_query_data_class) -> web.Application:
         json_api_routes=json_api_routes,
     )
     app.middlewares.append(kwargs_handler.middleware)
+
+    # Добавление роутов закомментировано, и оставлено здесь только для инфы.
+    # В текущей реализации сервиса роуты добавляются в приложение при
+    # подключении доки при помощи библиотеки aiohttp-swagger3.
+    # Это особенность данной библиотеки.
+    # app.add_routes(routes)
 
     return app

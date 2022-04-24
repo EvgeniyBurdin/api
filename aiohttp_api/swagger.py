@@ -5,14 +5,16 @@ from aiohttp_swagger3.routes import _SWAGGER_SPECIFICATION
 from core.data_classes.results import ErrorResultDC
 
 from .doc_makers import swagger_preparation
-from .routes import json_api_routes
 from .settings import API_DOC_URL, APP_NAME, REQUEST_BODY_ARG_NAME
+from typing import List
 
 
-def add_swagger_to_app(app: web.Application, is_debug: bool = True):
+def add_swagger_to_app(
+    app: web.Application, routes: List[web.RouteDef], is_debug: bool = True
+):
 
     definitions = swagger_preparation(
-        handlers=[route.handler for route in json_api_routes],
+        handlers=[route.handler for route in routes],
         # Имя аргумента в обработчиках по аннотации к которому будет
         # создаваться документация для входящих данных
         arg_name=REQUEST_BODY_ARG_NAME,
@@ -42,7 +44,8 @@ def add_swagger_to_app(app: web.Application, is_debug: bool = True):
         }
         swagger.spec["security"] = [{"basicAuth": []}]
     swagger._app[_SWAGGER_SPECIFICATION] = swagger.spec
-    # Роуты для всех JSON API методов добавляются так:
-    swagger.add_routes(json_api_routes)
+
     # (это "странность" библиотеки aiohttp_swagger3, скорее всего они применили
     # такой подход для реализации возможности валидации запросов в доке)
+    # Роуты для всех JSON API методов добавляются так:
+    swagger.add_routes(routes)
