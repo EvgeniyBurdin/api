@@ -117,17 +117,26 @@ def make_multipart_request_body(input_annotation) -> dict:
     return {"content": {"multipart/form-data": {"schema": s}}}
 
 
-def get_parameters_in_path(route: web.RouteDef):
-
+def make_parameters_in_path(route: web.RouteDef):
+    """ Создает описание для параметров в пути к методу.
+    """
     result = []
 
-    params = re.findall(r"{(.*?)}", route.path)
-    for param in params:
-        annotation = route.handler.__annotations__.get(param)
-        schema_class = create_schema_class(None, "Param", param, annotation)
-        props = schema_class.schema()["properties"][param]
-        definition = {
-            "name": param,
+    param_names = re.findall(r"{(.*?)}", route.path)
+
+    for param_name in param_names:
+
+        # Каждый параметр в пути к методу, должен быть аргументом у метода,
+        # и иметь аннотацию
+        annotation = route.handler.__annotations__.get(param_name)
+
+        # Для создания схемы воспользуемся временным классом Tmp
+        tmp_class = create_schema_class(None, "Tmp", param_name, annotation)
+        # Извлечем из схемы этого класса свойства для параметра
+        props = tmp_class.schema()["properties"][param_name]
+        # Созданим описание для параметра
+        parameter = {
+            "name": param_name,
             "in": "path",
             "required": True,
             "schema": {
@@ -135,12 +144,17 @@ def get_parameters_in_path(route: web.RouteDef):
                 "format": props["format"]
             }
         }
+
+        # При создании роута можно дополнительно указать любые свойства для
+        # параметра. Так как из аннотации к аргументу нам не доступны
+        # description и example, то их можно указать там (см. модуль routes.py)
         if "swagger_path_parameters" in route.kwargs:
-            if param in route.kwargs["swagger_path_parameters"]:
-                kwargs = route.kwargs["swagger_path_parameters"][param]
-                definition.update(kwargs)
-        result.append(definition)
-        print(definition)
+            if param_name in route.kwargs["swagger_path_parameters"]:
+                add = route.kwargs["swagger_path_parameters"][param_name]
+                parameter.update(add)
+
+        result.append(parameter)
+
     return result
 
 
@@ -269,7 +283,7 @@ def swagger_preparation(
                     }
                 }
 
-        parameters_in_path = get_parameters_in_path(route)
+        parameters_in_path = make_parameters_in_path(route)
         if parameters_in_path:
             docstring["parameters"] = parameters_in_path
 
