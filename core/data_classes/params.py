@@ -1,5 +1,6 @@
 """ Модуль для классов данных на параметров (аргументов).
 """
+import datetime
 from typing import Optional
 
 from pydantic import Field, StrictStr
@@ -12,6 +13,7 @@ class NewArticleDC(BaseDC):
     """
     header: StrictStr = Field(description="Заголовок")
     content: StrictStr = Field(description="Содержание")
+    created: Optional[datetime.date] = Field(description="Дата создания")
 
 
 class ReadArticlesDCA(BaseDCA):

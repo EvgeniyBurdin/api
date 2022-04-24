@@ -17,21 +17,26 @@ async def create_article(
     """ Создает в хранилище новую запись о статье.
         Возвращает созданную запись.
     """
-    body["created"] = datetime.datetime.now(
-        tz=datetime.timezone.utc
-    ).date()
+    if "created" in body:
+        body["created"] = datetime.datetime.strptime(
+            body["created"], '%Y-%m-%d'
+        ).date()
+    else:
+        body["created"] = datetime.datetime.now(
+            tz=datetime.timezone.utc
+        ).date()
 
     return await storage.create(table_name="articles", row=body)
 
 
 @validate_raw("return")
-@validate("created", "uq")
+@validate("created", "query")
 async def read_articles(
-    storage: Storage, created: datetime.date, uq: ReadArticlesDCA
+    storage: Storage, created: datetime.date, query: ReadArticlesDCA
 ) -> List[ArticleDC]:
     """ Читает из хранилища статьи и возвращает их.
     """
     filters = {"created": [created]}
-    print(uq.header_prefix)
+    print(query.header_prefix)
 
     return await storage.read(table_name="articles", filters=filters)
