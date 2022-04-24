@@ -137,8 +137,11 @@ def make_parameters_in_path(route: web.RouteDef):
     return result
 
 
-def get_tags(route: web.RouteDef, default):
-
+def get_tags(route: web.RouteDef, default: List[str]):
+    """ Извлекает из роута тэги для метода и возвращает их.
+    """
+    # При создании роута можно дополнительно указать тэги для метода.
+    # (см. модуль routes.py)
     if "swagger_handler_tags" in route.kwargs:
         return route.kwargs["swagger_handler_tags"]
     else:
