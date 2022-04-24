@@ -135,7 +135,12 @@ def get_parameters_in_path(route: web.RouteDef):
                 "format": props["format"]
             }
         }
+        if "swagger_parameters" in route.kwargs:
+            if param in route.kwargs["swagger_parameters"]:
+                kwargs = route.kwargs["swagger_parameters"][param]
+                definition.update(kwargs)
         result.append(definition)
+        print(definition)
     return result
 
 
