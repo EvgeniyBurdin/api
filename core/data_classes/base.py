@@ -1,4 +1,5 @@
-""" Модуль для базового класса данных."""
+""" Модуль для базовых классов данных.
+"""
 from typing import Any, Dict, Type
 
 from pydantic import BaseModel, Extra

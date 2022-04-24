@@ -1,3 +1,5 @@
+""" Модуль для декораторов обработчиков.
+"""
 from valdec.decorators import async_validate
 from valdec.data_classes import Settings
 from valdec.validator_pydantic import validator

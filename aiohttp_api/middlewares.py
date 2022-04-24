@@ -25,22 +25,16 @@ class InputDataValidationError(MiddlewaresError):
 
 
 class KwargsHandler:
-    """ Класс для middleware которая работает с обработчиками json-api методов,
-        которые могут иметь произвольное количество аргументов.
+    """ Класс для middleware которая работает с обработчиками json-api методов.
+        Методы могут иметь произвольное количество аргументов.
 
-        Для этого, каждый аргумент обработчика должен иметь аннотацию, и имя
-        агрумента должно быть предварительно зарегистрировано при создании
-        экземпляра web.Application().
+        Каждый аргумент обработчика должен иметь аннотацию.
 
-        Все аргументы в обработчик передаются именованными, поэтому не важен
-        порядок их определения в сигнатуре обработчика.
-
-        Аргумент, который должен принять в обработчик оригинальный request,
-        не требует регистрации. Он может иметь в сигнатуре обработчика любое
-        имя, но обязательно должен быть аннотирован типом: web.Request
+        Маппинг значений, полученных из запроса, в аргументы обработчика
+        производит arguments_manager.
 
         Все обработчики должны возвращать объекты питон, которые потом
-        кодируются в json функцией utils.json_dumps.
+        кодируются в json функцией json_dumps.
     """
     def __init__(
         self,
@@ -75,8 +69,8 @@ class KwargsHandler:
     def make_handler_kwargs(
         self, request: web.Request, handler: Callable, input_data: InputData
     ) -> dict:
-        """ Собирает и возвращает kwargs для последующего его использования
-            при вызове обработчика.
+        """ Собирает и возвращает словарь kwargs для последующего его
+            использования при вызове обработчика.
 
             Внимание! Все аргументы у обработчиков должны иметь аннотации.
         """
@@ -89,7 +83,7 @@ class KwargsHandler:
 
         for arg_name, annotation in annotations.items():
             try:
-                kwargs[arg_name] = self.arguments_manager.make_arg_value(
+                kwargs[arg_name] = self.arguments_manager.extract_arg_value(
                     raw_data=raw_data,
                     arg_name=arg_name,
                     annotation=annotation,

@@ -23,25 +23,29 @@ class ArgumentsManager:
         получения значения аргумента.
     """
 
-    def __init__(self, request_class: Type, query_class: Type) -> None:
+    def __init__(
+        self, request_class: Type, url_query_data_class: Type
+    ) -> None:
 
-        # Класс для идентификации аргумента для экземпляра web.Request
+        # Класс для идентификации аргумента экземпляра web.Request
         self.request_class = request_class
 
-        # Класс для идентификации аргумента для экземпляра класса_данных
+        # Класс для идентификации аргумента экземпляра класса_данных
         # с данными запроса из урла
-        self.query_class = query_class
+        self.url_query_data_class = url_query_data_class
 
         self.getters: Dict[str, Callable] = {}
 
-    def make_arg_value(
+    def extract_arg_value(
         self, raw_data: RawDataForArgument, arg_name: str, annotation
     ) -> Any:
-
+        """ Извлекает из данных, поступивших в запросе, значение для аргумента
+            обработчика, и возвращает его.
+        """
         if annotation is self.request_class:
             return raw_data.request
 
-        if issubclass(annotation, self.query_class):
+        if issubclass(annotation, self.url_query_data_class):
             return raw_data.input_data.url_query
 
         if arg_name in raw_data.input_data.url_parts:

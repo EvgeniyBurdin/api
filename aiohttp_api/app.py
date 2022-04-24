@@ -7,13 +7,13 @@ from .middlewares import KwargsHandler
 from .routes import json_api_routes
 
 
-def get_app(storage, query_class) -> web.Application:
+def get_app(storage, uro_query_data_class) -> web.Application:
 
     app = web.Application()
 
     # Для обработчиков JSON API
     arguments_manager = ArgumentsManager(
-        request_class=web.Request, query_class=query_class
+        request_class=web.Request, url_query_data_class=uro_query_data_class
     )
 
     app["storage"] = storage

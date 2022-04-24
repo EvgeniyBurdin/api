@@ -1,4 +1,4 @@
-""" Модуль для обработчиков CRUD.
+""" Модуль для обработчиков.
 """
 import datetime
 from typing import List
