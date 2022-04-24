@@ -7,6 +7,6 @@ from core.storages import Storage
 from aiohttp_api.app import get_app
 from aiohttp_api.settings import APP_PORT
 
-app = get_app(storage=Storage(), uro_query_data_class=BaseDCA)
+app = get_app(storage=Storage(), url_query_data_class=BaseDCA)
 
 web.run_app(app=app, port=APP_PORT)
