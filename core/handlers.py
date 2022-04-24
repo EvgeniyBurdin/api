@@ -5,23 +5,23 @@ from typing import List
 
 from storages import Storage
 
-from .data_classes.params import NewArticleDCRB, ReadArticlesDCUQ
+from .data_classes.params import NewArticleDC, ReadArticlesDCUQ
 from .data_classes.results import ArticleDC
 from .decorators import validate, validate_raw
 
 
 @validate_raw("body", "return")
 async def create_article(
-    new_article: NewArticleDCRB, storage: Storage
+    body: NewArticleDC, storage: Storage
 ) -> ArticleDC:
     """ Создает в хранилище новую запись о статье.
         Возвращает созданную запись.
     """
-    new_article["created"] = datetime.datetime.now(
+    body["created"] = datetime.datetime.now(
         tz=datetime.timezone.utc
     ).date()
 
-    return await storage.create(table_name="articles", row=new_article)
+    return await storage.create(table_name="articles", row=body)
 
 
 @validate_raw("return")

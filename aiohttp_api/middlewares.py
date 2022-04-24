@@ -4,6 +4,7 @@ from typing import Any, Callable, List, Optional, Tuple
 
 from aiohttp import web
 from valdec.errors import ValidationArgumentsError
+from data_classes.base import BaseDCUQ
 
 from .args_manager import ArgumentsManager, RawDataForArgument, json_dumps
 from .query import InputData, extract_input_data
@@ -82,7 +83,7 @@ class KwargsHandler:
         annotations = copy(handler.__annotations__)
         annotations.pop("return", None)
 
-        raw_data = RawDataForArgument(request, request_body)
+        raw_data = RawDataForArgument(request, input_data)
 
         for arg_name, annotation in annotations.items():
 
@@ -90,6 +91,9 @@ class KwargsHandler:
             # то передадим в него экземпляр оригинального request
             if annotation is web.Request:
                 kwargs[arg_name] = request
+                continue
+            if annotation is BaseDCUQ:
+                kwargs[arg_name] = input_data.url_params
                 continue
 
             raw_data.arg_name = arg_name

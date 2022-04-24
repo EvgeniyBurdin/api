@@ -17,19 +17,12 @@ class BaseDC(BaseModel):
 
         @staticmethod
         def schema_extra(
-            schema: Dict[str, Any], model: Type['BaseDCRB']
+            schema: Dict[str, Any], model: Type['BaseDC']
         ) -> None:
             """ Убирает у полей из схемы атрибут 'title'.
             """
             for prop in schema.get('properties', {}).values():
                 prop.pop('title', None)
-
-
-class BaseDCRB(BaseDC):
-    """ Базовый класс данных, которые могут приходить в теле запроса в json
-    (в терминалогии swagger эти данные в ключе requestBody, чтобы это
-    подчеркнуть, имя класса имеет окончание "RB").
-    """
 
 
 class BaseDCUQ(BaseDC):

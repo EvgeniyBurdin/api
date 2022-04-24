@@ -2,10 +2,10 @@
 """
 from pydantic import Field, StrictStr
 
-from .base import BaseDCRB, BaseDCUQ
+from .base import BaseDC, BaseDCUQ
 
 
-class NewArticleDCRB(BaseDCRB):
+class NewArticleDC(BaseDC):
     """ Данные для создания новой статьи.
     """
     header: StrictStr = Field(description="Заголовок")
