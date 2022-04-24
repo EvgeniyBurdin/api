@@ -1,17 +1,18 @@
-""" Различные классы и функции.
+""" Модуль для менеджера аргументов обработчиков.
 """
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Dict, Type
 
 from aiohttp import web
+
+from .query import InputData
 
 
 @dataclass
 class RawDataForArgument:
 
     request: web.Request
-    request_body: Any
-    arg_name: Optional[str] = None
+    input_data: InputData
 
 
 class ArgumentsManager:
@@ -21,9 +22,29 @@ class ArgumentsManager:
         получения значения аргумента.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, request_class: Type, query_class: Type) -> None:
+
+        self.request_class = request_class
+        self.query_class = query_class
 
         self.getters: Dict[str, Callable] = {}
+
+    def make_arg_value(
+        self, raw_data: RawDataForArgument, arg_name: str, annotation
+    ) -> Any:
+
+        if annotation is self.request_class:
+            return raw_data.request
+
+        if annotation is self.query_class:
+            return raw_data.input_data.url_query
+
+        if arg_name in raw_data.input_data.url_parts:
+            return raw_data.input_data.url_parts[arg_name]
+
+        getter = self.getters[arg_name]
+
+        return getter(raw_data)
 
     # Тело json запроса ------------------------------------------------------
 
@@ -33,7 +54,7 @@ class ArgumentsManager:
         self.getters[arg_name] = self.get_request_body
 
     def get_request_body(self, raw_data: RawDataForArgument):
-        return raw_data.request_body
+        return raw_data.input_data.request_body
 
     # Ключи в request --------------------------------------------------------
 

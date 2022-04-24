@@ -1,16 +1,16 @@
 """ Модуль для работы с запросом.
 """
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
 
 from aiohttp.web import Request
 
 
 @dataclass
 class InputData:
-    request_body: Any = None
-    url_parts: Optional[dict] = None
-    url_params: Optional[dict] = None
+    request_body: Any
+    url_parts: dict
+    url_query: dict
 
 
 async def extract_multipart_request_body(request: Request) -> dict:
@@ -37,7 +37,7 @@ async def extract_multipart_request_body(request: Request) -> dict:
         else:
             # Получили content_type="application/octet-stream"
             data = await part.read(decode=False)
-            request_body[part.name] = {
+            request_body[part.name] = {  # TODO: доработать класс для файла
                 "file_name": part.filename,
                 "file_data": data,
             }
@@ -66,6 +66,6 @@ async def extract_input_data(
     """
     request_body = await extract_request_body(request, is_multipart)
     url_parts = dict(request.match_info)
-    url_params = dict(request.query)
+    url_query = dict(request.query)
 
-    return InputData(request_body, url_parts, url_params)
+    return InputData(request_body, url_parts, url_query)

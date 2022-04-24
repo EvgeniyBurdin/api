@@ -1,10 +1,11 @@
+""" Модуль для оболочек запросов.
+"""
 from copy import copy
 from dataclasses import asdict
 from typing import Any, Callable, List, Optional, Tuple
 
 from aiohttp import web
 from valdec.errors import ValidationArgumentsError
-from data_classes.base import BaseDCUQ
 
 from .args_manager import ArgumentsManager, RawDataForArgument, json_dumps
 from .query import InputData, extract_input_data
@@ -87,29 +88,16 @@ class KwargsHandler:
 
         for arg_name, annotation in annotations.items():
 
-            # Если обработчик имеет аргумент с аннотацией aiohttp.web.Request,
-            # то передадим в него экземпляр оригинального request
-            if annotation is web.Request:
-                kwargs[arg_name] = request
-                continue
-            if annotation is BaseDCUQ:
-                kwargs[arg_name] = input_data.url_params
-                continue
-
-            raw_data.arg_name = arg_name
-
             try:
-                # функция которая затем вернет нам значение для
-                # аргумента с arg_name
-                get_arg_value = self.arguments_manager.getters[arg_name]
+                kwargs[arg_name] = self.arguments_manager.make_arg_value(
+                    raw_data, arg_name, annotation
+                )
 
             except KeyError:
                 msg = self.build_error_message_for_invalid_handler_argument(
                     handler, arg_name, annotation
                 )
                 raise InvalidHandlerArgument(msg)
-
-            kwargs[arg_name] = get_arg_value(raw_data)
 
         return kwargs
 
@@ -191,7 +179,7 @@ class KwargsHandler:
         except Exception as error:
             response_body = self.get_error_body(error)
             status = 400
-            input_data = InputData()
+            input_data = InputData(None, {}, {})
 
         else:
             # Запуск обработчика

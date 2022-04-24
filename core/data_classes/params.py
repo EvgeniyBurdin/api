@@ -2,7 +2,7 @@
 """
 from pydantic import Field, StrictStr
 
-from .base import BaseDC, BaseDCUQ
+from .base import BaseDC, BaseDCA
 
 
 class NewArticleDC(BaseDC):
@@ -12,7 +12,7 @@ class NewArticleDC(BaseDC):
     content: StrictStr = Field(description="Содержание")
 
 
-class ReadArticlesDCUQ(BaseDCUQ):
+class ReadArticlesDCA(BaseDCA):
     """ Данные для чтения статей.
     """
     header_prefix: StrictStr = Field(

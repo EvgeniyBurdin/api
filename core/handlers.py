@@ -5,7 +5,7 @@ from typing import List
 
 from storages import Storage
 
-from .data_classes.params import NewArticleDC, ReadArticlesDCUQ
+from .data_classes.params import NewArticleDC, ReadArticlesDCA
 from .data_classes.results import ArticleDC
 from .decorators import validate, validate_raw
 
@@ -27,7 +27,7 @@ async def create_article(
 @validate_raw("return")
 @validate("created", "uq")
 async def read_articles(
-    storage: Storage, created: datetime.date, uq: ReadArticlesDCUQ
+    storage: Storage, created: datetime.date, uq: ReadArticlesDCA
 ) -> List[ArticleDC]:
     """ Читает из хранилища статьи и возвращает их.
     """
