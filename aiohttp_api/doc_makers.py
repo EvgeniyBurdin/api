@@ -2,14 +2,13 @@
 
 import json
 from dataclasses import dataclass
-from typing import Optional, Type, Callable, Tuple, List
+from typing import List, Optional, Tuple, Type
 
+from aiohttp import web
+from core.data_classes.base import BaseMultipartDC
 from pydantic import create_model
 from pydantic.main import BaseModel
 from pydantic.schema import schema
-
-from core.data_classes.base import BaseMultipartDC
-
 
 TAGS_DOCSTRING_MARKER = ":swagger_tags:"
 
@@ -118,7 +117,7 @@ def make_multipart_request_body(input_annotation) -> dict:
 
 
 def swagger_preparation(
-    handlers: List[Callable],
+    routes: List[web.RouteDef],
     arg_name: str,
     request_wrap: Optional[ServerWrap] = None,
     response_wrap: Optional[ServerWrap] = None,
@@ -167,7 +166,9 @@ def swagger_preparation(
         )
         result_definitions.update(server_schema["definitions"])
 
-    for handler in handlers:
+    for route in routes:
+
+        handler = route.handler
 
         input_annotation = handler.__annotations__.get(arg_name)
         output_annotation = handler.__annotations__["return"]

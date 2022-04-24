@@ -1,12 +1,13 @@
+from typing import List
+
 from aiohttp import web
 from aiohttp_swagger3 import (RapiDocUiSettings, ReDocUiSettings, SwaggerDocs,
-                              SwaggerUiSettings)
+                              SwaggerInfo, SwaggerUiSettings)
 from aiohttp_swagger3.routes import _SWAGGER_SPECIFICATION
 from core.data_classes.results import ErrorResultDC
 
 from .doc_makers import swagger_preparation
 from .settings import API_DOC_URL, APP_NAME, REQUEST_BODY_ARG_NAME
-from typing import List
 
 
 def add_swagger_to_app(
@@ -14,7 +15,7 @@ def add_swagger_to_app(
 ):
 
     definitions = swagger_preparation(
-        handlers=[route.handler for route in routes],
+        routes=routes,
         # Имя аргумента в обработчиках по аннотации к которому будет
         # создаваться документация для входящих данных
         arg_name=REQUEST_BODY_ARG_NAME,
@@ -30,8 +31,7 @@ def add_swagger_to_app(
         swagger_ui_settings=SwaggerUiSettings(path=f"{API_DOC_URL}/"),
         redoc_ui_settings=ReDocUiSettings(path=f"{API_DOC_URL}_re/"),
         rapidoc_ui_settings=RapiDocUiSettings(path=f"{API_DOC_URL}_ra/"),
-        title=APP_NAME,
-        version="1.0.0",
+        info=SwaggerInfo(title=APP_NAME, version="1.0.0"),
         validate=False,  # Нам не нужна валидация запросов в доке
     )
     # Немного "грязновато", но иначе не подсунуть json-схемы классов данных
@@ -47,5 +47,5 @@ def add_swagger_to_app(
 
     # (это "странность" библиотеки aiohttp_swagger3, скорее всего они применили
     # такой подход для реализации возможности валидации запросов в доке)
-    # Роуты для всех JSON API методов добавляются так:
+    # Роуты для всех методов добавляем так:
     swagger.add_routes(routes)
