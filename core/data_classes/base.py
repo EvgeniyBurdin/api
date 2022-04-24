@@ -2,7 +2,7 @@
 """
 from typing import Any, Dict, Type
 
-from pydantic import BaseModel, Extra
+from pydantic import BaseModel, Extra, StrictStr
 
 
 class BaseDC(BaseModel):
@@ -30,3 +30,14 @@ class BaseDCA(BaseDC):
     """ Базовый класс данных, которые имеют аннотацию одним из
         классов-наследников (для точной идентификации аргумента функции).
     """
+
+
+class BaseFileDC(BaseDC):
+    file_name: StrictStr
+    file_data: Any
+
+
+class BaseMultipartDC(BaseDC):
+    """ Базовый класс для данных "multipart".
+    """
+    pass

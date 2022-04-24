@@ -32,6 +32,4 @@ def get_app(storage, url_query_data_class) -> web.Application:
     )
     app.middlewares.append(kwargs_handler.middleware)
 
-    app.add_routes(json_api_routes)
-
     return app

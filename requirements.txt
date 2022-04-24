@@ -1,3 +1,4 @@
 aiohttp==3.8.1
+aiohttp-swagger3==0.7.2
 valdec==1.1.0
 pydantic==1.9.0

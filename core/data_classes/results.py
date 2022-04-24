@@ -8,6 +8,13 @@ from pydantic import Field, StrictStr
 from .base import BaseDC
 
 
+class ErrorResultDC(BaseDC):
+    """ Ошибка.
+    """
+    error_type: StrictStr = Field(description="Тип ошибки.")
+    error_message: StrictStr = Field(description="Сообщение об ошибке.")
+
+
 class ArticleDC(BaseDC):
     """ Данные о статье.
     """
