@@ -5,7 +5,7 @@ from typing import Any, Callable, Dict, Type
 
 from aiohttp import web
 
-from .query import InputData
+from .query_data import InputData
 
 
 class ArgumentsManagerError(Exception):

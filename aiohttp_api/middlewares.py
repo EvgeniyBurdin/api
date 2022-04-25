@@ -9,7 +9,7 @@ from valdec.errors import ValidationArgumentsError
 
 from .args_manager import ArgumentsManager, RawDataForArgument
 from .json_utils import json_dumps
-from .query import InputData, extract_input_data
+from .query_data import InputData, extract_input_data
 
 
 class MiddlewaresError(Exception):

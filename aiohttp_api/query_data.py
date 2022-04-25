@@ -1,4 +1,4 @@
-""" Модуль для работы с запросом.
+""" Модуль для работы с данными запроса.
 """
 from dataclasses import dataclass
 from typing import Any
