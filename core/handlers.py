@@ -30,7 +30,7 @@ async def create_article(
 
 
 @validate_raw("return")
-@validate("created", "query")
+@validate("created", "parameters_in_query")
 async def read_articles(
     storage: Storage, created: datetime.date,
     parameters_in_query: ReadArticlesDCA
