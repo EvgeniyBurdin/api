@@ -6,12 +6,9 @@ from dataclasses import dataclass
 from typing import List, Optional, Tuple, Type
 
 from aiohttp import web
-from core.data_classes.base import BaseMultipartDC, BaseDCA
 from pydantic import create_model
 from pydantic.main import BaseModel
 from pydantic.schema import schema
-
-TAGS_DOCSTRING_MARKER = ":swagger_tags:"
 
 
 @dataclass
@@ -148,14 +145,16 @@ def get_tags(route: web.RouteDef, default: List[str]) -> List[str]:
         return default
 
 
-def make_parameters_in_query(route: web.RouteDef) -> List[dict]:
+def make_parameters_in_query(
+    route: web.RouteDef, url_query_data_class: Type[BaseModel],
+) -> List[dict]:
     """ Создает описание для параметров запроса в пути к методу и
         возвращает его.
     """
     result = []
 
     for ann in route.handler.__annotations__.values():
-        if isinstance(ann, type) and issubclass(ann, BaseDCA):
+        if isinstance(ann, type) and issubclass(ann, url_query_data_class):
             schema = ann.schema()
             required = schema.get("required", [])
             # Извлечем из схемы класса свойства для его полей
@@ -184,7 +183,9 @@ def make_parameters_in_query(route: web.RouteDef) -> List[dict]:
 def swagger_preparation(
     routes: List[web.RouteDef],
     request_body_arg_name: str,
-    error_class: Optional[Type[BaseModel]] = None,
+    multipart_data_class: Type[BaseModel],
+    url_query_data_class: Type[BaseModel],
+    error_data_class: Optional[Type[BaseModel]] = None,
     error_descriptions: Tuple[ServerError] = (
         ServerError("400", "Неправильный, некорректный запрос"),
         ServerError("401", "Ошибка авторизации"),
@@ -211,8 +212,8 @@ def swagger_preparation(
     result_definitions = {}
 
     server_classes = []
-    if error_class is not None:
-        server_classes.append(error_class)
+    if error_data_class is not None:
+        server_classes.append(error_data_class)
 
     if server_classes:
         server_schema = schema(
@@ -287,12 +288,12 @@ def swagger_preparation(
                 }
             }
         if input_annotation is not None:
-            if issubclass(input_annotation, BaseMultipartDC):
+            if issubclass(input_annotation, multipart_data_class):
                 docstring["requestBody"] = make_multipart_request_body(
                     input_annotation
                 )
 
-        if error_class is not None:
+        if error_data_class is not None:
             for error in error_descriptions:
                 docstring["responses"][error.code] = {
                     "description": error.description,
@@ -300,14 +301,16 @@ def swagger_preparation(
                         "application/json": {
                             "schema": {
                                 "$ref":
-                                f"#/components/schemas/{error_class.__name__}"
+                                f"#/components/schemas/{error_data_class.__name__}"  # noqa
                             }
                         }
                     }
                 }
 
         parameters_in_path = make_parameters_in_path(route)
-        parameters_in_query = make_parameters_in_query(route)
+        parameters_in_query = make_parameters_in_query(
+            route, url_query_data_class
+        )
 
         if parameters_in_path or parameters_in_query:
             docstring["parameters"] = parameters_in_path + parameters_in_query

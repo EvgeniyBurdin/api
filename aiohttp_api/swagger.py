@@ -4,14 +4,15 @@ from aiohttp import web
 from aiohttp_swagger3 import (RapiDocUiSettings, ReDocUiSettings, SwaggerDocs,
                               SwaggerInfo, SwaggerUiSettings)
 from aiohttp_swagger3.routes import _SWAGGER_SPECIFICATION
-from core.data_classes.results import ErrorResultDC
 
 from .doc_makers import swagger_preparation
 from .settings import API_DOC_URL, APP_NAME, REQUEST_BODY_ARG_NAME
 
 
 def add_swagger_to_app(
-    app: web.Application, routes: List[web.RouteDef], is_debug: bool = True
+    app: web.Application, routes: List[web.RouteDef],
+    multipart_data_class, url_query_data_class, error_data_class,
+    is_debug: bool = True
 ):
 
     definitions = swagger_preparation(
@@ -19,7 +20,9 @@ def add_swagger_to_app(
         # Имя аргумента в обработчиках по аннотации к которому будет
         # создаваться документация для входящих данных
         request_body_arg_name=REQUEST_BODY_ARG_NAME,
-        error_class=ErrorResultDC
+        multipart_data_class=multipart_data_class,
+        url_query_data_class=url_query_data_class,
+        error_data_class=error_data_class,
     )
 
     swagger = SwaggerDocs(
