@@ -32,7 +32,8 @@ async def create_article(
 @validate_raw("return")
 @validate("created", "query")
 async def read_articles(
-    storage: Storage, created: datetime.date, query: ReadArticlesDCA
+    storage: Storage, created: datetime.date,
+    parameters_in_query: ReadArticlesDCA
 ) -> List[ArticleDC]:
     """ Читает из хранилища статьи и возвращает их.
 
@@ -40,7 +41,7 @@ async def read_articles(
         префиксу заголовка.
     """
     filters = {"created": [created]}
-    print(query.header_prefix)
+    print(parameters_in_query.header_prefix)
 
     return await storage.read(table_name="articles", filters=filters)
 
