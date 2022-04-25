@@ -41,6 +41,8 @@ def add_swagger_to_app(
         swagger.spec["security"] = [{"basicAuth": []}]
     swagger._app[_SWAGGER_SPECIFICATION] = swagger.spec
 
+    print(swagger.spec)
+
     # Удалим ключи, который aiohttp_swagger3 "не хочет" принимать
     # (схему для сваггера мы уже сделали, и они уже и не нужны)
     for route in routes:

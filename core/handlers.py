@@ -3,10 +3,11 @@
 import datetime
 from typing import List
 
-from .storages import Storage
-from .data_classes.params import NewArticleDC, ReadArticlesDCA
+from .data_classes.params import (NewArticleDC, ReadArticlesDCA,
+                                  UploadArticleFileMultipartDC)
 from .data_classes.results import ArticleDC
 from .decorators import validate, validate_raw
+from .storages import Storage
 
 
 @validate_raw("body", "return")
@@ -34,8 +35,23 @@ async def read_articles(
     storage: Storage, created: datetime.date, query: ReadArticlesDCA
 ) -> List[ArticleDC]:
     """ Читает из хранилища статьи и возвращает их.
+
+        Фильтрует статьи по дате создания. Опционально можно отфильтровать по
+        префиксу заголовка.
     """
     filters = {"created": [created]}
     print(query.header_prefix)
 
     return await storage.read(table_name="articles", filters=filters)
+
+
+@validate_raw("return")
+@validate("body")
+async def upload_article_file(body: UploadArticleFileMultipartDC) -> str:
+    """ Загрузка файла к статье.
+    """
+    print(body.article_id)
+    print(body.file.file_name)
+    print(body.file.file_data)
+
+    return "OK"

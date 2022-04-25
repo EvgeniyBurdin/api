@@ -4,7 +4,7 @@ from aiohttp import web
 
 from .args_manager import ArgumentsManager
 from .middlewares import KwargsHandler
-from .routes import json_api_routes  # , routes
+from .routes import json_api_routes, multipart_api_routes  # , routes
 from .settings import REQUEST_BODY_ARG_NAME
 
 
@@ -30,6 +30,7 @@ def get_app(storage, url_query_data_class) -> web.Application:
     kwargs_handler = KwargsHandler(
         arguments_manager=arguments_manager,
         json_api_routes=json_api_routes,
+        multipart_api_routes=multipart_api_routes,
     )
     app.middlewares.append(kwargs_handler.middleware)
 

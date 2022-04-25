@@ -1,11 +1,12 @@
 """ Модуль для классов данных аргументов у обработчиков.
 """
 import datetime
+import uuid
 from typing import Optional
 
 from pydantic import Field, StrictStr
 
-from .base import BaseDC, BaseDCA
+from .base import BaseDC, BaseDCA, BaseFileDC, BaseMultipartDC
 
 
 class NewArticleDC(BaseDC):
@@ -21,4 +22,17 @@ class ReadArticlesDCA(BaseDCA):
     """
     header_prefix: Optional[StrictStr] = Field(
         description="Префикс заголовка для фильтрации статей"
+    )
+
+
+class UploadArticleFileMultipartDC(BaseMultipartDC):
+    """ "Мультиформа" запроса для загрузки файла к статье.
+    """
+    article_id: uuid.UUID = Field(
+        description="Форма для идентификатора cтатьи "
+                    "`content_type='application/json'`"
+    )
+    file: BaseFileDC = Field(
+        description="Форма для файла "
+                    "`content_type='application/octet-stream'`"
     )

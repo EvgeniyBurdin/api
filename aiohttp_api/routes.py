@@ -1,7 +1,7 @@
 """ Связи путей urls и их обработчиков.
 """
 from aiohttp import web
-from core.handlers import create_article, read_articles
+from core.handlers import create_article, read_articles, upload_article_file
 
 from .settings import ROOT_URL
 
@@ -24,7 +24,12 @@ json_api_routes = [
     ),
 ]
 
-multipart_api_routes = []
+multipart_api_routes = [
+    web.post(
+        ROOT_URL+"/upload_article_file", upload_article_file,
+        name="upload_article_file", swagger_handler_tags=["Статьи", "Файлы"],
+    ),
+]
 
 http_routes = []
 
