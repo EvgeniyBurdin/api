@@ -8,6 +8,10 @@ from aiohttp import web
 from .query import InputData
 
 
+class ArgumentsManagerError(Exception):
+    pass
+
+
 @dataclass
 class RawDataForArgument:
 
@@ -24,7 +28,7 @@ class ArgumentsManager:
     """
 
     def __init__(
-        self, request_class: Type, url_query_data_class: Type
+        self, request_class: web.Request, url_query_data_class: Type
     ) -> None:
 
         # Класс для идентификации аргумента экземпляра web.Request
