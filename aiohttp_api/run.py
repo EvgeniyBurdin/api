@@ -8,7 +8,7 @@ from aiohttp_api.routes import routes
 
 from aiohttp_api.app import get_app
 from aiohttp_api.settings import APP_PORT
-from aiohttp_api.swagger import add_swagger_to_app
+from aiohttp_api.doc.swagger import add_swagger_to_app
 
 app = get_app(storage=Storage(), url_query_data_class=BaseDCA)
 

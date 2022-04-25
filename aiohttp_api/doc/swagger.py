@@ -1,12 +1,14 @@
+from copy import deepcopy
 from typing import List
 
+import yaml
 from aiohttp import web
 from aiohttp_swagger3 import (RapiDocUiSettings, ReDocUiSettings, SwaggerDocs,
                               SwaggerInfo, SwaggerUiSettings)
 from aiohttp_swagger3.routes import _SWAGGER_SPECIFICATION
 
+from ..settings import API_DOC_URL, APP_NAME, REQUEST_BODY_ARG_NAME
 from .doc_makers import swagger_preparation
-from .settings import API_DOC_URL, APP_NAME, REQUEST_BODY_ARG_NAME
 
 
 def add_swagger_to_app(
@@ -44,8 +46,6 @@ def add_swagger_to_app(
         swagger.spec["security"] = [{"basicAuth": []}]
     swagger._app[_SWAGGER_SPECIFICATION] = swagger.spec
 
-    print(swagger.spec)
-
     # Удалим ключи, который aiohttp_swagger3 "не хочет" принимать
     # (схему для сваггера мы уже сделали, и они уже и не нужны)
     for route in routes:
@@ -56,3 +56,11 @@ def add_swagger_to_app(
     # такой подход для реализации возможности валидации запросов в доке)
     # Роуты для всех методов добавляем так:
     swagger.add_routes(routes)
+
+    data = deepcopy(swagger.spec)
+    components = data.pop("components", None)
+    add_data = {"components": components}
+
+    with open('shema.yml', 'w') as outfile:
+        yaml.dump(data, outfile, allow_unicode=True)
+        yaml.dump(add_data, outfile, allow_unicode=True)

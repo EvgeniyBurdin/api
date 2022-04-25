@@ -1,0 +1,255 @@
+info:
+  title: api_examle
+  version: 1.0.0
+openapi: 3.0.0
+paths: !!python/object/apply:collections.defaultdict
+  args:
+  - !!python/name:aiohttp_swagger3.swagger_docs.%3Clambda%3E ''
+  dictitems:
+    /create_article: !!python/object/apply:collections.defaultdict
+      args:
+      - &id001 !!python/name:builtins.dict ''
+      dictitems:
+        post:
+          description: Возвращает созданную запись.
+          requestBody:
+            content:
+              urlencoded:
+                schema:
+                  $ref: '#/components/schemas/NewArticleDC'
+            required: true
+          responses:
+            '200':
+              content:
+                application/json:
+                  schema:
+                    $ref: '#/components/schemas/ArticleDC'
+              description: Успешная операция
+            '400':
+              content:
+                application/json:
+                  schema:
+                    $ref: '#/components/schemas/ErrorResultDC'
+              description: Неправильный, некорректный запрос
+            '401':
+              content:
+                application/json:
+                  schema:
+                    $ref: '#/components/schemas/ErrorResultDC'
+              description: Ошибка авторизации
+            '500':
+              content:
+                application/json:
+                  schema:
+                    $ref: '#/components/schemas/ErrorResultDC'
+              description: Внутренняя ошибка сервера
+          summary: Создает в хранилище новую запись о статье.
+          tags:
+          - Статьи
+    /read_articles/{created}: !!python/object/apply:collections.defaultdict
+      args:
+      - *id001
+      dictitems:
+        get:
+          description: 'Фильтрует статьи по дате создания. Опционально можно отфильтровать
+            по
+
+            префиксу заголовка.'
+          parameters:
+          - description: Дата создания
+            example: '2022-04-26'
+            explode: false
+            in: path
+            name: created
+            required: true
+            schema:
+              format: date
+              type: string
+            style: simple
+          - description: Префикс заголовка для фильтрации статей
+            explode: true
+            in: query
+            name: header_prefix
+            required: false
+            schema:
+              type: string
+            style: form
+          responses:
+            '200':
+              content:
+                application/json:
+                  schema:
+                    items:
+                      $ref: '#/components/schemas/ArticleDC'
+                    title: Response
+                    type: array
+              description: Успешная операция
+            '400':
+              content:
+                application/json:
+                  schema:
+                    $ref: '#/components/schemas/ErrorResultDC'
+              description: Неправильный, некорректный запрос
+            '401':
+              content:
+                application/json:
+                  schema:
+                    $ref: '#/components/schemas/ErrorResultDC'
+              description: Ошибка авторизации
+            '500':
+              content:
+                application/json:
+                  schema:
+                    $ref: '#/components/schemas/ErrorResultDC'
+              description: Внутренняя ошибка сервера
+          summary: Читает из хранилища статьи и возвращает их.
+          tags:
+          - Статьи
+    /upload_article_file: !!python/object/apply:collections.defaultdict
+      args:
+      - *id001
+      dictitems:
+        post:
+          description: ''
+          requestBody:
+            content:
+              multipart/form-data:
+                schema:
+                  additionalProperties: false
+                  description: "\"Мультиформа\" запроса для загрузки файла к статье.\n\
+                    \    "
+                  properties:
+                    article_id:
+                      description: Форма для идентификатора cтатьи `content_type='application/json'`
+                      format: uuid
+                      type: string
+                    file:
+                      allOf:
+                      - format: binary
+                        type: string
+                      description: Форма для файла `content_type='application/octet-stream'`
+                  required:
+                  - article_id
+                  - file
+                  title: UploadArticleFileMultipartDC
+                  type: object
+            required: false
+          responses:
+            '200':
+              content:
+                application/json:
+                  schema:
+                    title: Response
+                    type: string
+              description: Успешная операция
+            '400':
+              content:
+                application/json:
+                  schema:
+                    $ref: '#/components/schemas/ErrorResultDC'
+              description: Неправильный, некорректный запрос
+            '401':
+              content:
+                application/json:
+                  schema:
+                    $ref: '#/components/schemas/ErrorResultDC'
+              description: Ошибка авторизации
+            '500':
+              content:
+                application/json:
+                  schema:
+                    $ref: '#/components/schemas/ErrorResultDC'
+              description: Внутренняя ошибка сервера
+          summary: Загрузка файла к статье.
+          tags:
+          - Статьи
+          - Файлы
+components:
+  schemas:
+    ArticleDC:
+      additionalProperties: false
+      description: "Данные о статье.\n    "
+      properties:
+        content:
+          description: Содержание
+          type: string
+        created:
+          description: Дата создания
+          format: date
+          type: string
+        header:
+          description: Заголовок
+          type: string
+        id:
+          description: Идентификатор
+          format: uuid
+          type: string
+      required:
+      - id
+      - created
+      - header
+      - content
+      title: ArticleDC
+      type: object
+    BaseFileDC:
+      additionalProperties: false
+      description: "Базовый класс данных.\n    "
+      properties:
+        file_data: {}
+        file_name:
+          type: string
+      required:
+      - file_name
+      title: BaseFileDC
+      type: object
+    ErrorResultDC:
+      additionalProperties: false
+      description: "Ошибка.\n    "
+      properties:
+        error_message:
+          description: Сообщение об ошибке.
+          type: string
+        error_type:
+          description: Тип ошибки.
+          type: string
+      required:
+      - error_type
+      - error_message
+      title: ErrorResultDC
+      type: object
+    NewArticleDC:
+      additionalProperties: false
+      description: "Данные для создания новой статьи.\n    "
+      properties:
+        content:
+          description: Содержание
+          type: string
+        created:
+          description: Дата создания
+          format: date
+          type: string
+        header:
+          description: Заголовок
+          type: string
+      required:
+      - header
+      - content
+      title: NewArticleDC
+      type: object
+    UploadArticleFileMultipartDC:
+      additionalProperties: false
+      description: "\"Мультиформа\" запроса для загрузки файла к статье.\n    "
+      properties:
+        article_id:
+          description: Форма для идентификатора cтатьи `content_type='application/json'`
+          format: uuid
+          type: string
+        file:
+          allOf:
+          - $ref: '#/components/schemas/BaseFileDC'
+          description: Форма для файла `content_type='application/octet-stream'`
+      required:
+      - article_id
+      - file
+      title: UploadArticleFileMultipartDC
+      type: object
