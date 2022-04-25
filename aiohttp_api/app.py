@@ -1,6 +1,7 @@
 """ Модуль для сборки приложения.
 """
 from aiohttp import web
+from typing import Type
 
 from .args_manager import ArgumentsManager
 from .middlewares import KwargsHandler
@@ -8,13 +9,14 @@ from .routes import json_api_routes, multipart_api_routes  # , routes
 from .settings import REQUEST_BODY_ARG_NAME
 
 
-def get_app(storage, url_query_data_class) -> web.Application:
+def get_app(storage, url_query_data_class: Type) -> web.Application:
 
     app = web.Application()
 
     # Для обработчиков JSON API
     arguments_manager = ArgumentsManager(
-        request_class=web.Request, url_query_data_class=url_query_data_class
+        request_class=web.Request,
+        url_query_data_class=url_query_data_class
     )
 
     app["storage"] = storage
@@ -38,6 +40,6 @@ def get_app(storage, url_query_data_class) -> web.Application:
     # app.add_routes(routes)
     # ... В текущей реализации сервиса роуты добавляются в приложение при
     # подключении доки при помощи библиотеки aiohttp-swagger3 (см. модуль
-    # swagger.py в текущей папке). Это особенность данной библиотеки.
+    # swagger.py). Это особенность данной библиотеки.
 
     return app
