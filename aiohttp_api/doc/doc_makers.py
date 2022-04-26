@@ -167,6 +167,10 @@ def make_parameters_in_query(
                     "schema": {"type": props["type"]}
                 }
 
+                example_ = props.get("example")
+                if example_ is not None:
+                    parameter["example"] = example_
+
                 description_ = props.get("description")
                 if description_ is not None:
                     parameter["description"] = description_

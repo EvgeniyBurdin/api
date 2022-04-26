@@ -21,7 +21,8 @@ class ReadArticlesDCA(BaseDCA):
     """ Данные для чтения статей.
     """
     header_prefix: Optional[StrictStr] = Field(
-        description="Префикс заголовка для фильтрации статей"
+        description="Префикс заголовка для фильтрации статей",
+        example="Статья о нов"
     )
 
 
