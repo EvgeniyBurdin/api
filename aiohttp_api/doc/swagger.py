@@ -1,3 +1,5 @@
+""" Модуль для подключения swagger к приложению.
+"""
 from copy import deepcopy
 from typing import List
 
@@ -8,7 +10,7 @@ from aiohttp_swagger3 import (RapiDocUiSettings, ReDocUiSettings, SwaggerDocs,
 from aiohttp_swagger3.routes import _SWAGGER_SPECIFICATION
 
 from ..settings import API_DOC_URL, APP_NAME, REQUEST_BODY_ARG_NAME
-from .doc_makers import swagger_preparation
+from .doc_maker import swagger_preparation
 
 
 def add_swagger_to_app(

@@ -67,7 +67,7 @@ paths: !!python/object/apply:collections.defaultdict
               type: string
             style: simple
           - description: Префикс заголовка для фильтрации статей
-            example: '1.'
+            example: Статья о нов
             explode: true
             in: query
             name: header_prefix
@@ -227,7 +227,6 @@ components:
           type: string
         created:
           description: Дата создания
-          example: '2022-04-27'
           format: date
           type: string
         header:

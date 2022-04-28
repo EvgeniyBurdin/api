@@ -3,8 +3,8 @@
 from aiohttp import web
 from typing import Type
 
-from .args_manager import ArgumentsManager
-from .middlewares import KwargsHandler
+from .requests_processing.args_manager import ArgumentsManager
+from .requests_processing.middlewares import KwargsHandler
 from .routes import json_api_routes, multipart_api_routes  # , routes
 from .settings import REQUEST_BODY_ARG_NAME
 

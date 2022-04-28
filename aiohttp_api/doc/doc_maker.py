@@ -1,5 +1,5 @@
-"""Функции для создания документации."""
-
+""" Модуль для сборки документации.
+"""
 import json
 import re
 from dataclasses import dataclass
