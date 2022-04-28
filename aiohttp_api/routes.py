@@ -1,4 +1,4 @@
-""" Связи путей urls и их обработчиков.
+""" Модуль для описания связей путей urls и их обработчиков.
 """
 from aiohttp import web
 from core.handlers import create_article, read_articles, upload_article_file
