@@ -66,13 +66,15 @@ class KwargsHandler:
 
         name, data = None, None
 
-        for fname in file_data_class.__fields__.keys():
+        field_names = list(file_data_class.__fields__.keys())
+        for fname in field_names:
             if "name" in fname:
                 name = fname
             if "data" in fname:
                 data = fname
         if name is None or data is None:
-            raise MiddlewaresError("Некорректное имя поля для файла")
+            msg = f"Некорректное имя поля для файла: {field_names}"
+            raise MiddlewaresError(msg)
 
         return FileKeyNames(name=name, data=data)
 
