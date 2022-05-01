@@ -1,7 +1,7 @@
 """ Модуль для подключения swagger к приложению.
 """
 from copy import deepcopy
-from typing import List
+from typing import List, Type
 
 import yaml
 from aiohttp import web
@@ -10,12 +10,15 @@ from aiohttp_swagger3 import (RapiDocUiSettings, ReDocUiSettings, SwaggerDocs,
 from aiohttp_swagger3.routes import _SWAGGER_SPECIFICATION
 
 from ..settings import API_DOC_URL, APP_NAME, REQUEST_BODY_ARG_NAME
-from .doc_maker import swagger_preparation
+from .maker import swagger_preparation
 
 
-def add_swagger_to_app(
-    app: web.Application, routes: List[web.RouteDef],
-    multipart_data_class, url_query_data_class, error_data_class,
+def add_routes_and_doc_to_app(
+    app: web.Application,
+    routes: List[web.RouteDef],
+    multipart_data_class: Type,
+    url_query_data_class: Type,
+    error_data_class: Type,
     is_debug: bool = True
 ):
 
