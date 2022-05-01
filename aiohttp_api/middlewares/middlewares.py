@@ -2,14 +2,14 @@
 """
 from copy import copy
 from dataclasses import asdict
-from typing import Any, Callable, List, Optional, Tuple
+from typing import Any, Callable, List, Optional, Tuple, Type
 
 from aiohttp import web
 from valdec.errors import ValidationArgumentsError
 
 from .args_manager import ArgumentsManager, RawDataForArgument
 from .json_utils import json_dumps
-from .query_data import InputData, extract_input_data
+from .query_data import FileKeyNames, InputData, extract_input_data
 
 
 class MiddlewaresError(Exception):
@@ -41,7 +41,8 @@ class KwargsHandler:
         arguments_manager: ArgumentsManager,
         json_api_routes: List[web.RouteDef],
         multipart_api_routes: Optional[List[web.RouteDef]] = None,
-    ) -> None:
+        file_data_class: Optional[Type] = None
+    ):
 
         self.arguments_manager = arguments_manager
 
@@ -51,9 +52,29 @@ class KwargsHandler:
 
         if multipart_api_routes is None:
             multipart_api_routes = []
+        elif file_data_class is None:
+            msg = "Имеются обработчики с multipart но не определен класс "
+            msg += "данных для файла"
+            raise MiddlewaresError(msg)
+
+        self.file_key_names = self.make_file_key_names(file_data_class)
         self.multipart_api_handlers = set([
             route.handler for route in multipart_api_routes
         ])
+
+    def make_file_key_names(self, file_data_class: Type) -> FileKeyNames:
+
+        name, data = None, None
+
+        for fname in file_data_class.__fields__.keys():
+            if "name" in fname:
+                name = fname
+            if "data" in fname:
+                data = fname
+        if name is None or data is None:
+            raise MiddlewaresError("Некорректное имя поля для файла")
+
+        return FileKeyNames(name=name, data=data)
 
     def build_error_message_for_invalid_handler_argument(
         self, handler: Callable, arg_name: str, annotation: Any
@@ -169,7 +190,9 @@ class KwargsHandler:
         is_multiparts = handler in self.multipart_api_handlers
 
         try:
-            input_data = await extract_input_data(request, is_multiparts)
+            input_data = await extract_input_data(
+                request, is_multiparts, self.file_key_names
+            )
 
         except Exception as error:
             response_body = self.get_error_body(error)

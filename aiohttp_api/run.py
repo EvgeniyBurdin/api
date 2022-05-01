@@ -1,7 +1,7 @@
 """ Модуль для запуска сервиса.
 """
 from aiohttp import web
-from core.data_classes.base import BaseDCA, BaseFileDC, BaseMultipartDC
+from core.data_classes.base import BaseDCA, FileDC, BaseMultipartDC
 from core.data_classes.results import ErrorResultDC
 from core.storages import Storage
 
@@ -17,6 +17,7 @@ REQUEST_BODY_ARG_NAME = "body"
 app = get_app(
     storage=Storage(),
     url_query_data_class=BaseDCA,
+    file_data_class=FileDC,
     request_body_arg_name=REQUEST_BODY_ARG_NAME,
 )
 
@@ -26,7 +27,7 @@ add_routes_and_doc_to_app(
     routes=routes,
     json_api_routes=json_api_routes,
     multipart_data_class=BaseMultipartDC,
-    base_file_data_class=BaseFileDC,
+    file_data_class=FileDC,
     url_query_data_class=BaseDCA,
     error_data_class=ErrorResultDC,
     request_body_arg_name=REQUEST_BODY_ARG_NAME,

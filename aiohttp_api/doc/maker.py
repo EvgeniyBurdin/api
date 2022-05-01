@@ -78,13 +78,13 @@ def create_schema_class(
 
 
 def make_multipart_request_body(
-    input_annotation, base_file_data_class: Type[BaseModel]
+    input_annotation, file_data_class: Type[BaseModel]
 ) -> dict:
 
     shema = input_annotation.schema()
     shema.pop("definitions", None)
 
-    file_class_ref = f"#/definitions/{base_file_data_class.__name__}"
+    file_class_ref = f"#/definitions/{file_data_class.__name__}"
     file_prop_val = {"type": "string", "format": "binary"}
 
     for prop, val in shema["properties"].items():
@@ -193,7 +193,7 @@ def swagger_preparation(
     routes: List[web.RouteDef],
     request_body_arg_name: str,
     multipart_data_class: Type[BaseModel],
-    base_file_data_class: Type[BaseModel],
+    file_data_class: Type[BaseModel],
     url_query_data_class: Type[BaseModel],
     error_data_class: Optional[Type[BaseModel]] = None,
     error_descriptions: Tuple[ServerError] = (
@@ -300,10 +300,10 @@ def swagger_preparation(
         if input_annotation is not None:
             if issubclass(input_annotation, multipart_data_class):
                 docstring["requestBody"] = make_multipart_request_body(
-                    input_annotation, base_file_data_class
+                    input_annotation, file_data_class
                 )
                 definitions.pop(input_annotation.__name__, None)
-                definitions.pop(base_file_data_class.__name__, None)
+                definitions.pop(file_data_class.__name__, None)
 
         if error_data_class is not None:
             for error in error_descriptions:

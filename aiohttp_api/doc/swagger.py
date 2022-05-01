@@ -18,7 +18,7 @@ def add_routes_and_doc_to_app(
     routes: List[web.RouteDef],
     json_api_routes: List[web.RouteDef],
     multipart_data_class: Type[BaseModel],
-    base_file_data_class: Type[BaseModel],
+    file_data_class: Type[BaseModel],
     url_query_data_class: Type[BaseModel],
     error_data_class: Type[BaseModel],
     request_body_arg_name: str,
@@ -46,7 +46,7 @@ def add_routes_and_doc_to_app(
         routes=json_api_routes,
         request_body_arg_name=request_body_arg_name,
         multipart_data_class=multipart_data_class,
-        base_file_data_class=base_file_data_class,
+        file_data_class=file_data_class,
         url_query_data_class=url_query_data_class,
         error_data_class=error_data_class,
     )

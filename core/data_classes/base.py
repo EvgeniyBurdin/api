@@ -32,14 +32,14 @@ class BaseDCA(BaseDC):
     """
 
 
-class BaseFileDC(BaseDC):
-    """ Базовый класс для загрузки файла.
-    """
-    file_name: StrictStr
-    file_data: Any
-
-
 class BaseMultipartDC(BaseDC):
     """ Базовый класс для данных "multipart".
     """
     pass
+
+
+class FileDC(BaseDC):
+    """ Класс для загрузки файла.
+    """
+    file_name: StrictStr
+    file_data: Any

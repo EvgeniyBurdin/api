@@ -12,6 +12,7 @@ from .routes import json_api_routes, multipart_api_routes  # , routes
 def get_app(
     storage,
     url_query_data_class: Type,
+    file_data_class: Type,
     request_body_arg_name: str,
 ) -> web.Application:
 
@@ -36,6 +37,7 @@ def get_app(
         arguments_manager=arguments_manager,
         json_api_routes=json_api_routes,
         multipart_api_routes=multipart_api_routes,
+        file_data_class=file_data_class,
     )
     app.middlewares.append(kwargs_handler.middleware)
 

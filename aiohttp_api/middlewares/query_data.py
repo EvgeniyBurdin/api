@@ -15,7 +15,17 @@ class InputData:
     url_query: dict    # данные из запроса в урле (в конце, через знак вопроса)
 
 
-async def extract_multipart_request_body(request: Request) -> dict:
+@dataclass
+class FileKeyNames:
+    """ Класс данных, для маппинга имен полей для файла.
+    """
+    name: str
+    data: str
+
+
+async def extract_multipart_request_body(
+    request: Request, file_key_names: FileKeyNames
+) -> dict:
     """ Читает данные из multipart.
 
         Внимание!
@@ -39,22 +49,27 @@ async def extract_multipart_request_body(request: Request) -> dict:
         else:
             # Получили content_type="application/octet-stream"
             data = await part.read(decode=False)
-            request_body[part.name] = {  # TODO: доработать класс для файла
-                "file_name": part.filename,
-                "file_data": data,
+
+            request_body[part.name] = {
+                file_key_names.name: part.filename,
+                file_key_names.data: data,
             }
 
     return request_body
 
 
-async def extract_request_body(request: Request,  is_multipart: bool) -> Any:
+async def extract_request_body(
+    request: Request,  is_multipart: bool, file_key_names: FileKeyNames
+) -> Any:
     """ Вытаскивает из запроса json или multipart, декодирует его в объект
         python, и возвращает его.
     """
     request_body = None
 
     if is_multipart:
-        request_body = await extract_multipart_request_body(request)
+        request_body = await extract_multipart_request_body(
+            request, file_key_names
+        )
     elif request.body_exists:
         request_body = await request.json()
 
@@ -62,11 +77,13 @@ async def extract_request_body(request: Request,  is_multipart: bool) -> Any:
 
 
 async def extract_input_data(
-    request: Request, is_multipart: bool
+    request: Request, is_multipart: bool, file_key_names: FileKeyNames
 ) -> InputData:
     """ Извлекает из запроса все входящие данные и возвращает их.
     """
-    request_body = await extract_request_body(request, is_multipart)
+    request_body = await extract_request_body(
+        request, is_multipart, file_key_names
+    )
     url_parts = dict(request.match_info)
     url_query = dict(request.query)
 

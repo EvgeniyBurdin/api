@@ -6,7 +6,7 @@ from typing import Optional
 
 from pydantic import Field, StrictStr
 
-from .base import BaseDC, BaseDCA, BaseFileDC, BaseMultipartDC
+from .base import BaseDC, BaseDCA, FileDC, BaseMultipartDC
 
 
 class NewArticleDC(BaseDC):
@@ -33,7 +33,7 @@ class UploadArticleFileMultipartDC(BaseMultipartDC):
         description="Форма для идентификатора cтатьи "
                     "`content_type='application/json'`"
     )
-    file: BaseFileDC = Field(
+    file: FileDC = Field(
         description="Форма для файла "
                     "`content_type='application/octet-stream'`"
     )
