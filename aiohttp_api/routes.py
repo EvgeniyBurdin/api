@@ -3,7 +3,8 @@
 from aiohttp import web
 from core.handlers import create_article, read_articles, upload_article_file
 
-from .settings import ROOT_URL
+from .handlers import health_check
+from .settings import HEALTH_CHECK_URL, ROOT_URL
 
 json_api_routes = [
     # Адреса для обработчиков JSON API
@@ -31,7 +32,12 @@ multipart_api_routes = [
     ),
 ]
 
-http_routes = []
+http_routes = [
+    web.get(
+        ROOT_URL+HEALTH_CHECK_URL, health_check, name="health_check",
+        allow_head=False,
+    ),
+]
 
 json_api_routes = json_api_routes + multipart_api_routes
 

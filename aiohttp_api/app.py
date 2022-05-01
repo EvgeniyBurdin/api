@@ -1,15 +1,19 @@
 """ Модуль для сборки приложения.
 """
-from aiohttp import web
 from typing import Type
+
+from aiohttp import web
 
 from .middlewares.args_manager import ArgumentsManager
 from .middlewares.middlewares import KwargsHandler
 from .routes import json_api_routes, multipart_api_routes  # , routes
-from .settings import REQUEST_BODY_ARG_NAME
 
 
-def get_app(storage, url_query_data_class: Type) -> web.Application:
+def get_app(
+    storage,
+    url_query_data_class: Type,
+    request_body_arg_name: str,
+) -> web.Application:
 
     app = web.Application()
 
@@ -26,7 +30,7 @@ def get_app(storage, url_query_data_class: Type) -> web.Application:
 
     # Регистрация имени аргумента обработчика JSON API, в который будут
     # передаваться данные полученные из json-тела запроса
-    arguments_manager.reg_request_body(REQUEST_BODY_ARG_NAME)
+    arguments_manager.reg_request_body(request_body_arg_name)
 
     # Создадим и подключим мидлевару для JSON API методов
     kwargs_handler = KwargsHandler(
