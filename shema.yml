@@ -207,17 +207,6 @@ components:
       - content
       title: ArticleDC
       type: object
-    BaseFileDC:
-      additionalProperties: false
-      description: "Базовый класс для загрузки файла.\n    "
-      properties:
-        file_data: {}
-        file_name:
-          type: string
-      required:
-      - file_name
-      title: BaseFileDC
-      type: object
     ErrorResultDC:
       additionalProperties: false
       description: "Ошибка.\n    "
@@ -251,23 +240,6 @@ components:
       - header
       - content
       title: NewArticleDC
-      type: object
-    UploadArticleFileMultipartDC:
-      additionalProperties: false
-      description: "\"Multipart форма\" запроса для загрузки файла к статье.\n    "
-      properties:
-        article_id:
-          description: Форма для идентификатора cтатьи `content_type='application/json'`
-          format: uuid
-          type: string
-        file:
-          allOf:
-          - $ref: '#/components/schemas/BaseFileDC'
-          description: Форма для файла `content_type='application/octet-stream'`
-      required:
-      - article_id
-      - file
-      title: UploadArticleFileMultipartDC
       type: object
   securitySchemes:
     bearerAuth:

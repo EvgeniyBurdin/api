@@ -81,21 +81,21 @@ def make_multipart_request_body(
     input_annotation, base_file_data_class: Type[BaseModel]
 ) -> dict:
 
-    s = input_annotation.schema()
-
-    s.pop("definitions", None)
+    shema = input_annotation.schema()
+    shema.pop("definitions", None)
 
     file_class_ref = f"#/definitions/{base_file_data_class.__name__}"
+    file_prop_val = {"type": "string", "format": "binary"}
 
-    for k, v in s["properties"].items():
-        if "$ref" in v:
-            if v["$ref"] == file_class_ref:
-                s["properties"][k] = {"type": "string", "format": "binary"}
-        if "allOf" in v:
-            if v["allOf"][0]["$ref"] == file_class_ref:
-                v["allOf"][0] = {"type": "string", "format": "binary"}
+    for prop, val in shema["properties"].items():
+        if "$ref" in val:
+            if val["$ref"] == file_class_ref:
+                shema["properties"][prop] = file_prop_val
+        if "allOf" in val:
+            if val["allOf"][0]["$ref"] == file_class_ref:
+                val["allOf"][0] = file_prop_val
 
-    return {"content": {"multipart/form-data": {"schema": s}}}
+    return {"content": {"multipart/form-data": {"schema": shema}}}
 
 
 def make_parameters_in_path(route: web.RouteDef) -> List[dict]:
@@ -302,6 +302,8 @@ def swagger_preparation(
                 docstring["requestBody"] = make_multipart_request_body(
                     input_annotation, base_file_data_class
                 )
+                definitions.pop(input_annotation.__name__, None)
+                definitions.pop(base_file_data_class.__name__, None)
 
         if error_data_class is not None:
             for error in error_descriptions:
