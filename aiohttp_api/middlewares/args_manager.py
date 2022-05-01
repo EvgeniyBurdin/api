@@ -27,12 +27,7 @@ class ArgumentsManager:
         получения значения аргумента.
     """
 
-    def __init__(
-        self, request_class: web.Request, url_query_data_class: Type
-    ) -> None:
-
-        # Класс для идентификации аргумента экземпляра web.Request
-        self.request_class = request_class
+    def __init__(self, url_query_data_class: Type):
 
         # Класс для идентификации аргумента экземпляра класса_данных
         # с данными запроса из урла
@@ -46,7 +41,7 @@ class ArgumentsManager:
         """ Извлекает из данных, поступивших в запросе, значение для аргумента
             обработчика, и возвращает его.
         """
-        if annotation is self.request_class:
+        if annotation is web.Request:
             return raw_data.request
 
         if issubclass(annotation, self.url_query_data_class):

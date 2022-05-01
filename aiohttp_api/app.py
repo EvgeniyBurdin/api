@@ -19,7 +19,6 @@ def get_app(
 
     # Для обработчиков JSON API
     arguments_manager = ArgumentsManager(
-        request_class=web.Request,
         url_query_data_class=url_query_data_class
     )
 
