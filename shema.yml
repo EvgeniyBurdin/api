@@ -130,7 +130,7 @@ paths: !!python/object/apply:collections.defaultdict
               multipart/form-data:
                 schema:
                   additionalProperties: false
-                  description: "\"Мультиформа\" запроса для загрузки файла к статье.\n\
+                  description: "\"Multipart форма\" запроса для загрузки файла к статье.\n\
                     \    "
                   properties:
                     article_id:
@@ -209,7 +209,7 @@ components:
       type: object
     BaseFileDC:
       additionalProperties: false
-      description: "Базовый класс данных.\n    "
+      description: "Базовый класс для загрузки файла.\n    "
       properties:
         file_data: {}
         file_name:
@@ -254,7 +254,7 @@ components:
       type: object
     UploadArticleFileMultipartDC:
       additionalProperties: false
-      description: "\"Мультиформа\" запроса для загрузки файла к статье.\n    "
+      description: "\"Multipart форма\" запроса для загрузки файла к статье.\n    "
       properties:
         article_id:
           description: Форма для идентификатора cтатьи `content_type='application/json'`

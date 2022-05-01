@@ -77,17 +77,22 @@ def create_schema_class(
     )
 
 
-def make_multipart_request_body(input_annotation) -> dict:
+def make_multipart_request_body(
+    input_annotation, base_file_data_class: Type[BaseModel]
+) -> dict:
 
     s = input_annotation.schema()
+
     s.pop("definitions", None)
+
+    file_class_ref = f"#/definitions/{base_file_data_class.__name__}"
 
     for k, v in s["properties"].items():
         if "$ref" in v:
-            if v["$ref"] == "#/definitions/BaseFileDC":
+            if v["$ref"] == file_class_ref:
                 s["properties"][k] = {"type": "string", "format": "binary"}
         if "allOf" in v:
-            if v["allOf"][0]["$ref"] == "#/definitions/BaseFileDC":
+            if v["allOf"][0]["$ref"] == file_class_ref:
                 v["allOf"][0] = {"type": "string", "format": "binary"}
 
     return {"content": {"multipart/form-data": {"schema": s}}}
@@ -188,6 +193,7 @@ def swagger_preparation(
     routes: List[web.RouteDef],
     request_body_arg_name: str,
     multipart_data_class: Type[BaseModel],
+    base_file_data_class: Type[BaseModel],
     url_query_data_class: Type[BaseModel],
     error_data_class: Optional[Type[BaseModel]] = None,
     error_descriptions: Tuple[ServerError] = (
@@ -294,7 +300,7 @@ def swagger_preparation(
         if input_annotation is not None:
             if issubclass(input_annotation, multipart_data_class):
                 docstring["requestBody"] = make_multipart_request_body(
-                    input_annotation
+                    input_annotation, base_file_data_class
                 )
 
         if error_data_class is not None:

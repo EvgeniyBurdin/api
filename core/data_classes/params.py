@@ -27,7 +27,7 @@ class ReadArticlesDCA(BaseDCA):
 
 
 class UploadArticleFileMultipartDC(BaseMultipartDC):
-    """ "Мультиформа" запроса для загрузки файла к статье.
+    """ "Multipart форма" запроса для загрузки файла к статье.
     """
     article_id: uuid.UUID = Field(
         description="Форма для идентификатора cтатьи "

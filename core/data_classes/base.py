@@ -33,6 +33,8 @@ class BaseDCA(BaseDC):
 
 
 class BaseFileDC(BaseDC):
+    """ Базовый класс для загрузки файла.
+    """
     file_name: StrictStr
     file_data: Any
 
