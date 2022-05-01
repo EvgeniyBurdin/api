@@ -13,5 +13,6 @@ async def health_check(request: web.Request) -> web.Response:
     responses:
         '200':
             description: Успешная операция.
+    security: []
     """
     return web.Response(text="OK")

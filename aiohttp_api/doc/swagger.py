@@ -57,15 +57,23 @@ def add_routes_and_doc_to_app(
         info=SwaggerInfo(title=app_name, version="1.0.0"),
         validate=False,  # Нам не нужна валидация запросов в доке
     )
+
+    if is_auth:
+        swagger.spec["components"] = {
+            "securitySchemes": {
+                "bearerAuth": {
+                    "type": "http",
+                    "scheme": "bearer",
+                    "bearerFormat": "JWT"
+                },
+            },
+        }
+        swagger.spec["security"] = [{"bearerAuth": []}]
+
     # Немного "грязновато", но иначе не подсунуть json-схемы классов данных
     # (при создании swagger они читаются из файла, но создавать из-за этого
     # файл - ещё хуже... ведь схемы у нас уже есть в словаре definitions)
-    swagger.spec["components"] = {"schemas": definitions}
-    if is_auth:
-        swagger.spec["components"]["securitySchemes"] = {
-            "basicAuth": {"type": "http", "scheme": "basic"},
-        }
-        swagger.spec["security"] = [{"basicAuth": []}]
+    swagger.spec["components"].update({"schemas": definitions})
     swagger._app[_SWAGGER_SPECIFICATION] = swagger.spec
 
     # Удалим ключи, который aiohttp_swagger3 "не хочет" принимать

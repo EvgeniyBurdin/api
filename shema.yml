@@ -55,6 +55,7 @@ paths: !!python/object/apply:collections.defaultdict
           responses:
             '200':
               description: Успешная операция.
+          security: []
           summary: Проверка состояния сервера
           tags:
           - служебные
@@ -178,7 +179,7 @@ paths: !!python/object/apply:collections.defaultdict
           - Статьи
           - Файлы
 security:
-- basicAuth: []
+- bearerAuth: []
 components:
   schemas:
     ArticleDC:
@@ -269,6 +270,7 @@ components:
       title: UploadArticleFileMultipartDC
       type: object
   securitySchemes:
-    basicAuth:
-      scheme: basic
+    bearerAuth:
+      bearerFormat: JWT
+      scheme: bearer
       type: http
